@@ -88,16 +88,19 @@ class JwtAuthFilterTest {
         var headers = new Object() {
             String tenantId;
             String userId;
+            String locale;
         };
         GatewayFilterChain chain = (e) -> {
             headers.tenantId = e.getRequest().getHeaders().getFirst("X-Tenant-Id");
             headers.userId = e.getRequest().getHeaders().getFirst("X-User-Id");
+            headers.locale = e.getRequest().getHeaders().getFirst("X-Locale");
             return Mono.empty();
         };
 
         filter.filter(exchange, chain).block();
         assertEquals("1", headers.tenantId);
         assertEquals("100", headers.userId);
+        assertEquals("zh", headers.locale);
     }
 
     @Test

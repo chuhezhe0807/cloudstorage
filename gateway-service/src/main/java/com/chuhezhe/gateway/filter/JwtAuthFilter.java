@@ -24,21 +24,19 @@ import java.util.List;
 
 /**
  * 全局 JWT 鉴权过滤器。
- * 白名单路径放行；其他请求校验 Bearer Token，将 tenantId/userId 注入请求头。
+ * 白名单路径放行；其他请求校验 Bearer Token，将 tenantId/userId/locale 注入请求头。
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter implements GlobalFilter, Ordered {
 
-    // 无需鉴权的路径
     private static final List<String> WHITELIST_PATHS = List.of(
             "/api/auth/register",
             "/api/auth/login",
             "/api/auth/refresh"
     );
 
-    // 分享提取路径（访客无 JWT，需放行）
     private static final List<String> SHARE_ACCESS_PREFIX = List.of("/api/shares/");
 
     private final JwtUtil jwtUtil;
@@ -47,12 +45,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-        // 白名单直接放行
         if (isWhitelisted(path)) {
             return chain.filter(exchange);
         }
 
-        // 提取并校验 Bearer Token
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return errorResponse(exchange, 401, "error.unauthorized");
@@ -64,12 +60,17 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
             Long tenantId = claims.get("tenantId", Long.class);
             Long userId = claims.get("userId", Long.class);
+            String locale = claims.get("locale", String.class);
 
-            // 将 tenantId/userId 注入请求头，下游通过 TenantContextFilter 读取
             ServerHttpRequest request = exchange.getRequest().mutate()
                     .header("X-Tenant-Id", String.valueOf(tenantId))
                     .header("X-User-Id", String.valueOf(userId))
                     .build();
+
+            // 用户偏好语言注入
+            if (locale != null && !locale.isBlank()) {
+                request = request.mutate().header("X-Locale", locale).build();
+            }
 
             return chain.filter(exchange.mutate().request(request).build());
 
@@ -86,7 +87,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         return -100;
     }
 
-    // 检查路径是否在白名单
     private boolean isWhitelisted(String path) {
         if (WHITELIST_PATHS.contains(path)) {
             return true;
@@ -99,7 +99,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         return false;
     }
 
-    // 统一错误响应（JSON）
     private Mono<Void> errorResponse(ServerWebExchange exchange, int code, String i18nKey) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.valueOf(code));

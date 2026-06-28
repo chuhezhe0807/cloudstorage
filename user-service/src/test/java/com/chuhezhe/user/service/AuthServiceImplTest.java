@@ -60,8 +60,8 @@ class AuthServiceImplTest {
         req.setPassword("password123");
 
         when(userMapper.findByAccount("testuser")).thenReturn(Optional.empty());
-        when(jwtUtil.generateAccessToken(anyLong(), anyLong())).thenReturn("access-token");
-        when(jwtUtil.generateRefreshToken(anyLong(), anyLong())).thenReturn("refresh-token");
+        when(jwtUtil.generateAccessToken(anyLong(), anyLong(), anyString())).thenReturn("access-token");
+        when(jwtUtil.generateRefreshToken(anyLong(), anyLong(), anyString())).thenReturn("refresh-token");
 
         LoginResponse response = authService.register(req);
 
@@ -99,8 +99,8 @@ class AuthServiceImplTest {
         when(userMapper.findByAccount("testuser")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(true);
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
-        when(jwtUtil.generateAccessToken(1L, 100L)).thenReturn("access-token");
-        when(jwtUtil.generateRefreshToken(1L, 100L)).thenReturn("refresh-token");
+        when(jwtUtil.generateAccessToken(anyLong(), anyLong(), anyString())).thenReturn("access-token");
+        when(jwtUtil.generateRefreshToken(anyLong(), anyLong(), anyString())).thenReturn("refresh-token");
 
         LoginResponse response = authService.login(req);
 

@@ -36,12 +36,22 @@ public class JwtUtil {
 
     /** 签发 Access Token（短期，默认15分钟） */
     public String generateAccessToken(Long tenantId, Long userId) {
-        return generateToken(tenantId, userId, accessTokenTtl);
+        return generateToken(tenantId, userId, "zh", accessTokenTtl);
+    }
+
+    /** 签发 Access Token（带语言偏好） */
+    public String generateAccessToken(Long tenantId, Long userId, String locale) {
+        return generateToken(tenantId, userId, locale, accessTokenTtl);
     }
 
     /** 签发 Refresh Token（长期，默认7天） */
     public String generateRefreshToken(Long tenantId, Long userId) {
-        return generateToken(tenantId, userId, refreshTokenTtl);
+        return generateToken(tenantId, userId, "zh", refreshTokenTtl);
+    }
+
+    /** 签发 Refresh Token（带语言偏好） */
+    public String generateRefreshToken(Long tenantId, Long userId, String locale) {
+        return generateToken(tenantId, userId, locale, refreshTokenTtl);
     }
 
     /** 校验 Token 签名并返回 Claims */
@@ -61,16 +71,22 @@ public class JwtUtil {
         return claims.get("userId", Long.class);
     }
 
+    public String getLocale(Claims claims) {
+        String locale = claims.get("locale", String.class);
+        return locale != null ? locale : "zh";
+    }
+
     public boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
     }
 
     /** HS256 签名生成 JWT */
-    private String generateToken(Long tenantId, Long userId, long ttl) {
+    private String generateToken(Long tenantId, Long userId, String locale, long ttl) {
         Date now = new Date();
         return Jwts.builder()
                 .claim("tenantId", tenantId)
                 .claim("userId", userId)
+                .claim("locale", locale)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + ttl))
                 .signWith(getKey())

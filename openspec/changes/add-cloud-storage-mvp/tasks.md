@@ -75,11 +75,11 @@
 
 ## 8. i18n 与安全加固
 
-- [ ] 8.1 `messages_zh.properties` / `messages_en.properties` 全错误码覆盖
-- [ ] 8.2 `LocaleResolver` 优先级：用户偏好 > Accept-Language > 默认 zh
-- [ ] 8.3 统一响应体 + 全局异常处理器输出 i18n message + args
-- [ ] 8.4 安全审查：路径穿越单测、XSS 过滤、上传类型白名单单测、HTTPS 配置文档、预签名 URL TTL 校验
-- [ ] 8.5 i18n 接口测试覆盖中/英/带参/回退
+- [x] 8.1 `messages_zh.properties` / `messages_en.properties` 全错误码覆盖
+- [x] 8.2 `LocaleResolver` 优先级：用户偏好 > Accept-Language > 默认 zh
+- [x] 8.3 统一响应体 + 全局异常处理器输出 i18n message + args
+- [x] 8.4 安全审查：路径穿越单测、XSS 过滤、上传类型白名单单测、HTTPS 配置文档、预签名 URL TTL 校验
+- [x] 8.5 i18n 接口测试覆盖中/英/带参/回退
 
 ## 9. 前端脚手架
 

@@ -1,7 +1,6 @@
 package com.chuhezhe.common.util;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,6 @@ class JwtUtilTest {
 
     @BeforeEach
     void setUp() {
-        // 32+ char secret for HS256
         jwtUtil.setSecret("test-secret-key-that-is-at-least-256-bits-long-enough-for-hmac");
         jwtUtil.setAccessTokenTtl(60000);
         jwtUtil.setRefreshTokenTtl(300000);
@@ -27,7 +25,18 @@ class JwtUtilTest {
 
         assertEquals(1L, jwtUtil.getTenantId(claims));
         assertEquals(100L, jwtUtil.getUserId(claims));
+        assertEquals("zh", jwtUtil.getLocale(claims)); // 默认 zh
         assertFalse(jwtUtil.isTokenExpired(claims));
+    }
+
+    @Test
+    void generateAccessTokenWithLocale() {
+        String token = jwtUtil.generateAccessToken(1L, 100L, "en");
+        Claims claims = jwtUtil.validateToken(token);
+
+        assertEquals(1L, jwtUtil.getTenantId(claims));
+        assertEquals(100L, jwtUtil.getUserId(claims));
+        assertEquals("en", jwtUtil.getLocale(claims));
     }
 
     @Test

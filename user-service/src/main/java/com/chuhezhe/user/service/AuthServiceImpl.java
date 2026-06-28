@@ -74,9 +74,9 @@ public class AuthServiceImpl implements AuthService {
         user.setTheme(Optional.ofNullable(request.getTheme()).orElse("light"));
         userMapper.insert(user);
 
-        // 签发双 Token
-        String accessToken = jwtUtil.generateAccessToken(tenant.getId(), user.getId());
-        String refreshToken = jwtUtil.generateRefreshToken(tenant.getId(), user.getId());
+        // 签发双 Token（带用户语言偏好）
+        String accessToken = jwtUtil.generateAccessToken(tenant.getId(), user.getId(), user.getLocale());
+        String refreshToken = jwtUtil.generateRefreshToken(tenant.getId(), user.getId(), user.getLocale());
 
         storeRefreshToken(user.getId(), refreshToken);
 
@@ -108,9 +108,9 @@ public class AuthServiceImpl implements AuthService {
         // 登录成功，清除失败计数
         clearLoginFailures(request.getAccount());
 
-        // 签发双 Token
-        String accessToken = jwtUtil.generateAccessToken(user.getTenantId(), user.getId());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getTenantId(), user.getId());
+        // 签发双 Token（带用户语言偏好）
+        String accessToken = jwtUtil.generateAccessToken(user.getTenantId(), user.getId(), user.getLocale());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getTenantId(), user.getId(), user.getLocale());
 
         storeRefreshToken(user.getId(), refreshToken);
 
@@ -153,8 +153,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 旋转：签发新 Token，标记旧 Token 已用
-        String accessToken = jwtUtil.generateAccessToken(tenantId, userId);
-        String newRefreshToken = jwtUtil.generateRefreshToken(tenantId, userId);
+        String accessToken = jwtUtil.generateAccessToken(tenantId, userId, user.getLocale());
+        String newRefreshToken = jwtUtil.generateRefreshToken(tenantId, userId, user.getLocale());
 
         markTokenUsed(oldToken);
         storeRefreshToken(userId, newRefreshToken);

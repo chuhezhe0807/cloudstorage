@@ -9,6 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Locale;
 
+/**
+ * 国际化 Locale 解析器。
+ * 优先级：网关 X-Locale 头（JWT中用户偏好） > Accept-Language 请求头 > 默认 zh。
+ */
 @Configuration
 public class LocaleConfig {
 
@@ -21,10 +25,21 @@ public class LocaleConfig {
 
         @Override
         public Locale resolveLocale(HttpServletRequest request) {
-            String header = request.getHeader("Accept-Language");
-            if (header != null && header.toLowerCase().startsWith("en")) {
-                return Locale.ENGLISH;
+            // 1. 优先来自网关注入的 X-Locale（JWT 中的用户偏好）
+            String localeHeader = request.getHeader("X-Locale");
+            if (localeHeader != null) {
+                if (localeHeader.startsWith("en")) return Locale.ENGLISH;
+                if (localeHeader.startsWith("zh")) return Locale.SIMPLIFIED_CHINESE;
             }
+
+            // 2. 其次 Accept-Language 请求头
+            String acceptLang = request.getHeader("Accept-Language");
+            if (acceptLang != null) {
+                if (acceptLang.toLowerCase().startsWith("en")) return Locale.ENGLISH;
+                if (acceptLang.contains("zh")) return Locale.SIMPLIFIED_CHINESE;
+            }
+
+            // 3. 默认中文
             return Locale.SIMPLIFIED_CHINESE;
         }
 
