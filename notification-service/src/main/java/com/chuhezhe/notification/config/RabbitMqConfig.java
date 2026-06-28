@@ -46,4 +46,17 @@ public class RabbitMqConfig {
                 .to(eventExchange())
                 .with("notification.dlq");
     }
+
+    /** 二期 RAG 索引请求队列（预留，当前不接消费者） */
+    @Bean
+    public Queue kbIndexQueue() {
+        return QueueBuilder.durable("cloudstorage.kb.index").build();
+    }
+
+    @Bean
+    public Binding kbIndexBinding() {
+        return BindingBuilder.bind(kbIndexQueue())
+                .to(eventExchange())
+                .with("kb.index.request");
+    }
 }

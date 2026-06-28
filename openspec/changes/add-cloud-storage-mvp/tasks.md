@@ -120,7 +120,7 @@
 
 ## 13. 二期 RAG 预留（仅占位，不实现）
 
-- [ ] 13.1 `common` 模块定义 `EmbeddingProvider` SPI 接口（embed/批量 embed），一期不实现
-- [ ] 13.2 `core-service` 留 `kb` 空包占位
-- [ ] 13.3 `knowledge_base` / `kb_chunk` 建表（带 `tenant_id`、pgvector 列、IVFFlat 索引占位）
-- [ ] 13.4 RabbitMQ 预留 `kb.index.request` exchange/queue（不接消费者）
+- [x] 13.1 `common` 模块定义 `EmbeddingProvider` SPI 接口（embed/批量 embed），一期不实现
+- [x] 13.2 `core-service` 留 `kb` 空包占位
+- [x] 13.3 `knowledge_base` / `kb_chunk` 建表（带 `tenant_id`、pgvector 列）
+- [x] 13.4 RabbitMQ 预留 `kb.index.request` exchange/queue（不接消费者）
