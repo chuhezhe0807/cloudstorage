@@ -3,32 +3,29 @@ import MainLayout from '../components/layout/MainLayout';
 import AuthGuard from '../components/auth/AuthGuard';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import FileListPage from '../pages/files/FileListPage';
+import RecycleBinPage from '../pages/files/RecycleBinPage';
+import SearchPage from '../pages/files/SearchPage';
+import ShareManagementPage from '../pages/shares/ShareManagementPage';
+import NotificationListPage from '../pages/notifications/NotificationListPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const router = createBrowserRouter([
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
-  },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
   {
     path: '/',
-    element: (
-      <AuthGuard>
-        <MainLayout />
-      </AuthGuard>
-    ),
+    element: <AuthGuard><MainLayout /></AuthGuard>,
     children: [
       { index: true, element: <Navigate to="/files" replace /> },
+      { path: 'files', element: <FileListPage /> },
+      { path: 'recycle', element: <RecycleBinPage /> },
+      { path: 'search', element: <SearchPage /> },
+      { path: 'shares', element: <ShareManagementPage /> },
+      { path: 'notifications', element: <NotificationListPage /> },
     ],
   },
-  {
-    path: '*',
-    element: <NotFoundPage />,
-  },
+  { path: '*', element: <NotFoundPage /> },
 ]);
 
 export default router;
