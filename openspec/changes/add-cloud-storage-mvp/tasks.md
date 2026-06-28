@@ -1,13 +1,13 @@
 ## 1. 地基与脚手架
 
-- [ ] 1.1 编写 `docker-compose.yml`：Nacos、Postgres(+pgvector 扩展)、Redis、RabbitMQ、MinIO、SkyWalking OAP+UI，本地一键起
-- [ ] 1.2 创建 Maven 多模块父工程 `cloudstorage-parent`：统一依赖版本管理（Spring Cloud / Cloud Alibaba / MyBatis-Plus / JWT / MinIO SDK / SkyWalking agent / Lombok / MapStruct）、Java 21、Checkstyle 配置
-- [ ] 1.3 创建 `common` 模块：统一响应体 `Result<T>`、全局异常体系与错误码枚举、i18n `MessageSource` 配置、`TenantContext`、雪花 ID 配置、DTO 基类、常量
-- [ ] 1.4 各服务模块骨架：`gateway-service` / `user-service` / `core-service` / `notification-service`，均含启动类、`bootstrap.yml`(Nacos)、SkyWalking agent 接入配置
-- [ ] 1.5 Postgres 初始化脚本：启用 `pgvector` 扩展、`tenant` / `user` / `file_meta` / `file_content` / `file_chunk` / `share_link` / `notification` / `outbox_event` / `kb`(预留空表) 建表，所有业务表带 `tenant_id` 列与索引
-- [ ] 1.6 MyBatis-Plus 多租户插件配置：忽略表白名单、自动注入 `tenant_id` 条件、雪花 ID 注入器
-- [ ] 1.7 Nacos 配置命名空间与 dataId 规划，上传各服务 `application.yml` 到 Nacos
-- [ ] 1.8 编写 `AGENTS.md` 记录构建/测试命令（mvn verify、JaCoCo 报告路径），供后续会话使用
+- [x] 1.1 编写 `docker-compose.yml`：Nacos、Postgres(+pgvector 扩展)、Redis、RabbitMQ、MinIO、SkyWalking OAP+UI，本地一键起
+- [x] 1.2 创建 Maven 多模块父工程 `cloudstorage-parent`：统一依赖版本管理（Spring Cloud / Cloud Alibaba / MyBatis-Plus / JWT / MinIO SDK / SkyWalking agent / Lombok / MapStruct）、Java 21、Checkstyle 配置
+- [x] 1.3 创建 `common` 模块：统一响应体 `Result<T>`、全局异常体系与错误码枚举、i18n `MessageSource` 配置、`TenantContext`、雪花 ID 配置、DTO 基类、常量
+- [x] 1.4 各服务模块骨架：`gateway-service` / `user-service` / `core-service` / `notification-service`，均含启动类、`bootstrap.yml`(Nacos)、SkyWalking agent 接入配置
+- [x] 1.5 Postgres 初始化脚本：启用 `pgvector` 扩展、`tenant` / `user` / `file_meta` / `file_content` / `file_chunk` / `share_link` / `notification` / `outbox_event` / `kb`(预留空表) 建表，所有业务表带 `tenant_id` 列与索引
+- [x] 1.6 MyBatis-Plus 多租户插件配置：忽略表白名单、自动注入 `tenant_id` 条件、雪花 ID 注入器
+- [x] 1.7 Nacos 配置命名空间与 dataId 规划，上传各服务 `application.yml` 到 Nacos
+- [x] 1.8 编写 `AGENTS.md` 记录构建/测试命令（mvn verify、JaCoCo 报告路径），供后续会话使用
 
 ## 2. 网关与多租户基础设施
 

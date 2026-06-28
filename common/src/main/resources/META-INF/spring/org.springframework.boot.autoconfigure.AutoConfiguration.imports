@@ -1,0 +1,4 @@
+com.chuhezhe.common.config.CommonAutoConfiguration
+com.chuhezhe.common.config.MessageSourceConfig
+com.chuhezhe.common.config.LocaleConfig
+com.chuhezhe.common.config.MybatisPlusMetaConfig
