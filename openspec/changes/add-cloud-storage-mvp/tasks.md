@@ -59,11 +59,11 @@
 
 ## 6. 分享（core-service / share 模块）
 
-- [ ] 6.1 share_link 实体与 Mapper
-- [ ] 6.2 创建分享 `POST /api/shares`：可选提取码（默认生成 6 位）、expire_at、max_downloads、code ≥ 32 位随机
-- [ ] 6.3 访问分享 `POST /api/shares/{code}/access`：提取码校验 + 锁定限流、过期/次数校验、返回预签名 URL 或目录快照
-- [ ] 6.4 我的分享列表 `GET /api/shares`、取消 `DELETE /api/shares/{id}`、更新 `PATCH /api/shares/{id}`
-- [ ] 6.5 share 模块单元测试 + 接口测试
+- [x] 6.1 share_link 实体与 Mapper
+- [x] 6.2 创建分享 `POST /api/shares`：可选提取码（默认生成 6 位）、expire_at、max_downloads、code ≥ 32 位随机
+- [x] 6.3 访问分享 `POST /api/shares/{code}/access`：提取码校验 + 锁定限流、过期/次数校验、返回预签名 URL 或目录快照
+- [x] 6.4 我的分享列表 `GET /api/shares`、取消 `DELETE /api/shares/{id}`、更新 `PATCH /api/shares/{id}`
+- [x] 6.5 share 模块单元测试 + 接口测试
 
 ## 7. 通知（notification-service）
 
