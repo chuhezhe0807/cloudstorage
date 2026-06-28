@@ -32,16 +32,16 @@
 
 ## 4. 文件元数据与目录树（core-service / file 模块）
 
-- [ ] 4.1 file_meta / file_content 实体与 Mapper，物化路径 + parent_id 双字段
-- [ ] 4.2 目录创建接口 `POST /api/files/mkdir`
-- [ ] 4.3 列表接口 `GET /api/files?parentId=`：Redis 缓存目录列表，租户过滤
-- [ ] 4.4 重命名接口 `PATCH /api/files/{id}/rename`：同目录同名冲突校验
-- [ ] 4.5 移动接口 `PATCH /api/files/{id}/move`：Redis 分布式锁、子树物化路径前缀原子更新、锁超时 409
-- [ ] 4.6 软删除接口 `DELETE /api/files/{id}`：置 deleted_at
-- [ ] 4.7 回收站列表/还原/永久删除接口：永久删除联动 MinIO 对象 + ref_count + 配额释放
-- [ ] 4.8 搜索接口 `GET /api/files/search`：名称模糊 + 类型/大小/时间过滤 + 分页
-- [ ] 4.9 回收站自动清理定时任务（30 天到期永久删除）
-- [ ] 4.10 file 模块单元测试 + 接口测试（Testcontainers PG/Redis/MinIO）
+- [x] 4.1 file_meta / file_content 实体与 Mapper，物化路径 + parent_id 双字段
+- [x] 4.2 目录创建接口 `POST /api/files/mkdir`
+- [x] 4.3 列表接口 `GET /api/files?parentId=`：Redis 缓存目录列表，租户过滤
+- [x] 4.4 重命名接口 `PATCH /api/files/{id}/rename`：同目录同名冲突校验
+- [x] 4.5 移动接口 `PATCH /api/files/{id}/move`：Redis 分布式锁、子树物化路径前缀原子更新、锁超时 409
+- [x] 4.6 软删除接口 `DELETE /api/files/{id}`：置 deleted_at
+- [x] 4.7 回收站列表/还原/永久删除接口：永久删除联动 MinIO 对象 + ref_count + 配额释放
+- [x] 4.8 搜索接口 `GET /api/files/search`：名称模糊 + 类型/大小/时间过滤 + 分页
+- [x] 4.9 回收站自动清理定时任务（30 天到期永久删除）
+- [x] 4.10 file 模块单元测试 + 接口测试（Testcontainers PG/Redis/MinIO）
 
 ## 5. 上传下载（core-service / storage 模块）
 
