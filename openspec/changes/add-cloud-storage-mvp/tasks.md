@@ -21,14 +21,14 @@
 
 ## 3. 用户与认证（user-service）
 
-- [ ] 3.1 注册接口 `POST /api/auth/register`：账号唯一校验、BCrypt 密码、同事务建 personal 租户 + owner 用户、签发 JWT
-- [ ] 3.2 登录接口 `POST /api/auth/login`：密码校验、5 次错误锁定（Redis 计数）、签发 access+refresh
-- [ ] 3.3 刷新接口 `POST /api/auth/refresh`：refresh 一次性旋转、重复使用撤销全部 refresh
-- [ ] 3.4 登出接口 `POST /api/auth/logout`：refresh 入 Redis 黑名单
-- [ ] 3.5 用户偏好接口 `GET/PUT /api/user/preferences`：locale / theme 读写
-- [ ] 3.6 Redis 会话与黑名单封装
-- [ ] 3.7 user-service 单元测试（JUnit5+Mockito）：注册/登录/刷新/偏好，覆盖率 ≥ 70%
-- [ ] 3.8 user-service 接口测试（RestAssured + Testcontainers PG/Redis）：全流程 + 错误码 i18n
+- [x] 3.1 注册接口 `POST /api/auth/register`：账号唯一校验、BCrypt 密码、同事务建 personal 租户 + owner 用户、签发 JWT
+- [x] 3.2 登录接口 `POST /api/auth/login`：密码校验、5 次错误锁定（Redis 计数）、签发 access+refresh
+- [x] 3.3 刷新接口 `POST /api/auth/refresh`：refresh 一次性旋转、重复使用撤销全部 refresh
+- [x] 3.4 登出接口 `POST /api/auth/logout`：refresh 入 Redis 黑名单
+- [x] 3.5 用户偏好接口 `GET/PUT /api/user/preferences`：locale / theme 读写
+- [x] 3.6 Redis 会话与黑名单封装
+- [x] 3.7 user-service 单元测试（JUnit5+Mockito）：注册/登录/刷新/偏好，覆盖率 ≥ 70%
+- [x] 3.8 user-service 接口测试（RestAssured + Testcontainers PG/Redis）：全流程 + 错误码 i18n
 
 ## 4. 文件元数据与目录树（core-service / file 模块）
 

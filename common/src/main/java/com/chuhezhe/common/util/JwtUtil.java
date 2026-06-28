@@ -1,7 +1,6 @@
 package com.chuhezhe.common.util;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,6 +10,10 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+/**
+ * JWT 工具类：签发/校验 Access Token 和 Refresh Token。
+ * 配置前缀 jwt.secret / jwt.access-token-ttl / jwt.refresh-token-ttl。
+ */
 @Component
 @ConfigurationProperties(prefix = "jwt")
 public class JwtUtil {
@@ -31,14 +34,17 @@ public class JwtUtil {
         this.refreshTokenTtl = refreshTokenTtl;
     }
 
+    /** 签发 Access Token（短期，默认15分钟） */
     public String generateAccessToken(Long tenantId, Long userId) {
         return generateToken(tenantId, userId, accessTokenTtl);
     }
 
+    /** 签发 Refresh Token（长期，默认7天） */
     public String generateRefreshToken(Long tenantId, Long userId) {
         return generateToken(tenantId, userId, refreshTokenTtl);
     }
 
+    /** 校验 Token 签名并返回 Claims */
     public Claims validateToken(String token) {
         return Jwts.parser()
                 .verifyWith(getKey())
@@ -59,6 +65,7 @@ public class JwtUtil {
         return claims.getExpiration().before(new Date());
     }
 
+    /** HS256 签名生成 JWT */
     private String generateToken(Long tenantId, Long userId, long ttl) {
         Date now = new Date();
         return Jwts.builder()
@@ -70,6 +77,7 @@ public class JwtUtil {
                 .compact();
     }
 
+    /** 获取签名密钥，不足32字节时自动补0到256位 */
     private SecretKey getKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {

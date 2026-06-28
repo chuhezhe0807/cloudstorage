@@ -13,9 +13,13 @@ import org.springframework.core.Ordered;
 
 import java.util.Set;
 
+/**
+ * 公共自动配置：注册 TenantContextFilter + MyBatis-Plus 多租户插件。
+ */
 @Configuration
 public class CommonAutoConfiguration {
 
+    /** 注册 TenantContextFilter，仅 Servlet 环境生效（Gateway 使用 Reactive） */
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public FilterRegistrationBean<TenantContextFilter> tenantContextFilterRegistration() {
@@ -26,10 +30,15 @@ public class CommonAutoConfiguration {
         return registration;
     }
 
+    /**
+     * MyBatis-Plus 多租户插件：自动为 SQL 注入 WHERE tenant_id = ?。
+     * 仅在有 MybatisPlusInterceptor 的类路径时激活（Gateway 不激活）。
+     */
     @Configuration
     @ConditionalOnClass(com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.class)
     public static class MybatisPlusTenantConfig {
 
+        // 不注入 tenant_id 过滤的表：tenant/user 需跨租户查询，share_link 需访客访问，outbox_event 需全局扫描
         private static final Set<String> IGNORE_TABLES = Set.of("tenant", "user", "share_link", "outbox_event");
 
         @Bean
@@ -44,7 +53,7 @@ public class CommonAutoConfiguration {
                                 public Expression getTenantId() {
                                     Long tenantId = TenantContext.getTenantId();
                                     if (tenantId == null) {
-                                        return new LongValue(0);
+                                        return new LongValue(0); // 无租户上下文时填0，避免 NPE
                                     }
                                     return new LongValue(tenantId);
                                 }
