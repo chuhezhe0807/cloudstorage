@@ -11,13 +11,13 @@
 
 ## 2. 网关与多租户基础设施
 
-- [ ] 2.1 gateway-service 路由配置：user / core / notification 三下游服务路由
-- [ ] 2.2 全局 JWT 鉴权过滤器：校验签名与过期、白名单（注册/登录/刷新/分享提取）放行、解析 tenantId 注入 `X-Tenant-Id` 头
-- [ ] 2.3 限流过滤器（Sentinel）：按用户/租户维度限流，超限返回 429
-- [ ] 2.4 统一错误响应与 i18n：网关层错误按 `Accept-Language` 解析消息
-- [ ] 2.5 下游服务 `TenantContext` 过滤器：从 `X-Tenant-Id` 头初始化 ThreadLocal、与 JWT 校验一致性、请求结束清理
-- [ ] 2.6 CORS 配置允许前端域名
-- [ ] 2.7 gateway 接口测试（RestAssured）：鉴权/白名单/租户头注入/限流
+- [x] 2.1 gateway-service 路由配置：user / core / notification 三下游服务路由
+- [x] 2.2 全局 JWT 鉴权过滤器：校验签名与过期、白名单（注册/登录/刷新/分享提取）放行、解析 tenantId 注入 `X-Tenant-Id` 头
+- [x] 2.3 限流过滤器（Sentinel）：按用户/租户维度限流，超限返回 429
+- [x] 2.4 统一错误响应与 i18n：网关层错误按 `Accept-Language` 解析消息
+- [x] 2.5 下游服务 `TenantContext` 过滤器：从 `X-Tenant-Id` 头初始化 ThreadLocal、与 JWT 校验一致性、请求结束清理
+- [x] 2.6 CORS 配置允许前端域名
+- [x] 2.7 gateway 接口测试（RestAssured）：鉴权/白名单/租户头注入/限流
 
 ## 3. 用户与认证（user-service）
 

@@ -46,6 +46,8 @@ jwt:
   access-token-ttl: 900000
   refresh-token-ttl: 604800000
 
+spring.cloud.sentinel.transport.dashboard: localhost:8080
+
 logging:
   level:
     com.chuhezhe: DEBUG

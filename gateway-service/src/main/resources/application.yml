@@ -3,6 +3,29 @@ spring:
     name: gateway-service
   profiles:
     active: dev
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**, /api/user/**
+        - id: core-service
+          uri: lb://core-service
+          predicates:
+            - Path=/api/files/**, /api/storage/**, /api/shares/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+      scg:
+        fallback:
+          mode: response
+          response-status: 429
+          response-body: '{"code":429,"message":"error.too_many_requests"}'
 
 server:
   port: 8080
