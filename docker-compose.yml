@@ -11,7 +11,7 @@ services:
       - "8848:8848"
       - "9848:9848"
     volumes:
-      - nacos-data:/home/nacos/data
+      - ./data/nacos:/home/nacos/data
 
   postgres:
     image: pgvector/pgvector:pg16
@@ -23,7 +23,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
   redis:
@@ -33,7 +33,7 @@ services:
       - "6379:6379"
     command: redis-server --requirepass redis123
     volumes:
-      - redis-data:/data
+      - ./data/redis:/data
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -45,7 +45,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - ./data/rabbitmq:/var/lib/rabbitmq
 
   minio:
     image: minio/minio:latest
@@ -57,7 +57,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio-data:/data
+      - ./data/minio:/data
     command: server /data --console-address ":9001"
 
   skywalking-oap:
@@ -79,10 +79,3 @@ services:
       - "8081:8080"
     depends_on:
       - skywalking-oap
-
-volumes:
-  nacos-data:
-  pg-data:
-  redis-data:
-  rabbitmq-data:
-  minio-data:
