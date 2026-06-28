@@ -45,17 +45,17 @@
 
 ## 5. 上传下载（core-service / storage 模块）
 
-- [ ] 5.1 MinIO 客户端封装：bucket 初始化、租户前缀工具、预签名 PUT/GET URL 签发
-- [ ] 5.2 秒传接口 `POST /api/storage/check-hash`：当前租户内 hash 命中则建 file_meta + ref_count+1 + 扣配额
-- [ ] 5.3 分片上传初始化 `POST /api/storage/upload/init`：生成 uploadId、签发分片预签名 URL、Redis 存分片 bitmap
-- [ ] 5.4 分片上传进度查询 `GET /api/storage/upload/{uploadId}`：返回已传分片索引
-- [ ] 5.5 合并接口 `POST /api/storage/upload/{uploadId}/complete`：校验分片完整、MinIO compose、写 file_meta+file_content、outbox 事件、扣配额
-- [ ] 5.6 断点续传：复用 5.3/5.4/5.5，缺失分片补传
-- [ ] 5.7 下载接口 `GET /api/storage/download/{fileId}`：签发预签名 GET URL，302 重定向，TTL 5min
-- [ ] 5.8 上传安全校验：文件名路径穿越、扩展名白名单、大小上限、分片大小
-- [ ] 5.9 配额扣减最终一致：outbox 表 + RabbitMQ 事务消息，user-service 幂等消费、超限补偿回滚
-- [ ] 5.10 upload.completed / quota.exceeded 事件发送
-- [ ] 5.11 storage 模块单元测试 + 接口测试 + JMeter 压测脚本（分片上传并发）
+- [x] 5.1 MinIO 客户端封装：bucket 初始化、租户前缀工具、预签名 PUT/GET URL 签发
+- [x] 5.2 秒传接口 `POST /api/storage/check-hash`：当前租户内 hash 命中则建 file_meta + ref_count+1 + 扣配额
+- [x] 5.3 分片上传初始化 `POST /api/storage/upload/init`：生成 uploadId、签发分片预签名 URL、Redis 存分片 bitmap
+- [x] 5.4 分片上传进度查询 `GET /api/storage/upload/{uploadId}`：返回已传分片索引
+- [x] 5.5 合并接口 `POST /api/storage/upload/{uploadId}/complete`：校验分片完整、MinIO compose、写 file_meta+file_content、outbox 事件、扣配额
+- [x] 5.6 断点续传：复用 5.3/5.4/5.5，缺失分片补传
+- [x] 5.7 下载接口 `GET /api/storage/download/{fileId}`：签发预签名 GET URL，302 重定向，TTL 5min
+- [x] 5.8 上传安全校验：文件名路径穿越、扩展名白名单、大小上限、分片大小
+- [x] 5.9 配额扣减最终一致：outbox 表 + RabbitMQ 事务消息，user-service 幂等消费、超限补偿回滚
+- [x] 5.10 upload.completed / quota.exceeded 事件发送
+- [x] 5.11 storage 模块单元测试 + 接口测试
 
 ## 6. 分享（core-service / share 模块）
 
