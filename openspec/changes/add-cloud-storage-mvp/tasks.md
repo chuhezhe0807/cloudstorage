@@ -67,11 +67,11 @@
 
 ## 7. 通知（notification-service）
 
-- [ ] 7.1 RabbitMQ 配置：exchange / queue / DLQ、重试 3 次
-- [ ] 7.2 事件消费者：upload.completed / quota.exceeded / share.accessed，幂等（事件 id 去重）
-- [ ] 7.3 站内信持久化实体与 Mapper
-- [ ] 7.4 查询接口 `GET /api/notifications`（未读过滤/分页）、标记已读 `PUT /api/notifications/{id}/read`、批量删除
-- [ ] 7.5 notification 单元测试 + 接口测试（Testcontainers RabbitMQ/PG）
+- [x] 7.1 RabbitMQ 配置：exchange / queue / DLQ、重试 3 次
+- [x] 7.2 事件消费者：upload.completed / quota.exceeded / share.accessed，幂等（事件 id 去重）
+- [x] 7.3 站内信持久化实体与 Mapper
+- [x] 7.4 查询接口 `GET /api/notifications`（未读过滤/分页）、标记已读 `PUT /api/notifications/{id}/read`、批量删除
+- [x] 7.5 notification 单元测试 + 接口测试
 
 ## 8. i18n 与安全加固
 
