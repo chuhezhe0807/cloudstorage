@@ -83,12 +83,12 @@
 
 ## 9. 前端脚手架
 
-- [ ] 9.1 Vite + React + TS 工程初始化，集成 Antd + Tailwind + Zustand + i18next + react-router
-- [ ] 9.2 axios 客户端封装：baseURL、`Accept-Language` 头注入、JWT 拦截器、refresh 自动续期、错误码 toast
-- [ ] 9.3 主题（亮/暗）+ 语言（中/英）全局 Provider，localStorage 持久化 + 登录后同步偏好
-- [ ] 9.4 路由守卫 + 全局错误边界 + 错误回退页
-- [ ] 9.5 登录/注册页（含表单校验、错误码 i18n）
-- [ ] 9.6 主布局：侧边栏 + 顶栏（主题/语言切换、用户菜单、通知入口）
+- [x] 9.1 Vite + React + TS 工程初始化，集成 Antd + Tailwind + Zustand + i18next + react-router
+- [x] 9.2 axios 客户端封装：baseURL、`Accept-Language` 头注入、JWT 拦截器、refresh 自动续期、错误码 toast
+- [x] 9.3 主题（亮/暗）+ 语言（中/英）全局 Provider，localStorage 持久化 + 登录后同步偏好
+- [x] 9.4 路由守卫 + 全局错误边界 + 错误回退页
+- [x] 9.5 登录/注册页（含表单校验、错误码 i18n）
+- [x] 9.6 主布局：侧边栏 + 顶栏（主题/语言切换、用户菜单、通知入口）
 
 ## 10. 前端文件浏览器与上传下载
 
