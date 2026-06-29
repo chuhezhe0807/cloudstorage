@@ -53,6 +53,7 @@ export default function FileUploadModal({ open, parentId, onClose, onSuccess }: 
         const end = Math.min(start + CHUNK_SIZE, file.size);
         const blob = file.slice(start, end);
         await fetch(chunkUrls[i].url, { method: 'PUT', body: blob });
+        await apiClient.post(`/storage/upload/${uploadId}/chunk/${i}`);
 
         const progress = Math.round(((i + 1) / chunkUrls.length) * 90);
         setFiles((prev) => prev.map((f, fi) => fi === idx ? { ...f, progress } : f));

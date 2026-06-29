@@ -13,6 +13,9 @@ public interface StorageService {
     /** 查询分片上传进度 */
     UploadProgressResponse getUploadProgress(String uploadId);
 
+    /** 确认单个分片已上传（客户端直传 MinIO 后回调） */
+    void confirmChunk(String uploadId, int chunkIndex);
+
     /** 完成合并分片，写元数据 + outbox */
     FileUploadResponse completeUpload(String uploadId);
 }

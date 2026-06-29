@@ -154,6 +154,18 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
+    public void confirmChunk(String uploadId, int chunkIndex) {
+        String metaKey = String.format(UPLOAD_META_KEY, uploadId);
+        if (redisTemplate.opsForHash().entries(metaKey).isEmpty()) {
+            throw new BusinessException(ErrorCode.UPLOAD_NOT_FOUND);
+        }
+        String chunksKey = String.format(UPLOAD_CHUNKS_KEY, uploadId);
+        redisTemplate.opsForSet().add(chunksKey, String.valueOf(chunkIndex));
+        redisTemplate.expire(chunksKey, Duration.ofHours(24));
+        log.info("分片确认: uploadId={}, chunkIndex={}", uploadId, chunkIndex);
+    }
+
+    @Override
     @Transactional
     public FileUploadResponse completeUpload(String uploadId) {
         Long tenantId = TenantContext.getTenantId();

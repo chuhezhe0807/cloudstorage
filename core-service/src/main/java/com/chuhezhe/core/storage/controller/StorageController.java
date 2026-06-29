@@ -52,6 +52,13 @@ public class StorageController {
         return Result.ok(storageService.getUploadProgress(uploadId));
     }
 
+    /** 确认单个分片已上传（客户端直传 MinIO 后回调） */
+    @PostMapping("/upload/{uploadId}/chunk/{chunkIndex}")
+    public Result<Void> confirmChunk(@PathVariable String uploadId, @PathVariable int chunkIndex) {
+        storageService.confirmChunk(uploadId, chunkIndex);
+        return Result.ok();
+    }
+
     /** 通知合并分片 */
     @PostMapping("/upload/{uploadId}/complete")
     public Result<FileUploadResponse> completeUpload(@PathVariable String uploadId) {
