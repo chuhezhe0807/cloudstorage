@@ -15,7 +15,7 @@ public class RabbitListenerConfig {
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setMaxConcurrency(1);
+        factory.setMaxConcurrentConsumers(1);
         factory.setDefaultRequeueRejected(false);
         return factory;
     }
