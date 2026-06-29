@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS file_content (
     size BIGINT NOT NULL,
     storage_key VARCHAR(512) NOT NULL,
     ref_count INT NOT NULL DEFAULT 1,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_fc_tenant_hash ON file_content(tenant_id, hash);
 
@@ -79,7 +80,8 @@ CREATE TABLE IF NOT EXISTS file_chunk (
     chunk_index INT NOT NULL,
     chunk_hash VARCHAR(128),
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_fch_upload ON file_chunk(upload_id);
 
@@ -114,7 +116,8 @@ CREATE TABLE IF NOT EXISTS notification (
     payload JSONB,
     event_id VARCHAR(128),
     read_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_notif_tenant_user ON notification(tenant_id, user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_notif_event ON notification(event_id);
@@ -129,7 +132,8 @@ CREATE TABLE IF NOT EXISTS outbox_event (
     payload JSONB NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     retries INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_oe_status ON outbox_event(status);
 

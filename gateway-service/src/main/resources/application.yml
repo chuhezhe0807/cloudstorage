@@ -3,7 +3,18 @@ spring:
     name: gateway-service
   profiles:
     active: dev
+  config:
+    import: "optional:nacos:cloudstorage-common.yaml"
   cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yaml
     gateway:
       routes:
         - id: user-service
@@ -21,11 +32,6 @@ spring:
     sentinel:
       transport:
         dashboard: localhost:8080
-      scg:
-        fallback:
-          mode: response
-          response-status: 429
-          response-body: '{"code":429,"message":"error.too_many_requests"}'
 
 server:
   port: 8080

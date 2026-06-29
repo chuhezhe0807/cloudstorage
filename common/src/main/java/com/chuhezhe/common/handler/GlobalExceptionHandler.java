@@ -5,6 +5,7 @@ import com.chuhezhe.common.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.Locale;
 @RestControllerAdvice
 @RequiredArgsConstructor
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnClass(RestControllerAdvice.class)
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;

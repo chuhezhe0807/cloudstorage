@@ -1,5 +1,8 @@
 package com.chuhezhe.common.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +15,11 @@ import java.util.Locale;
 /**
  * 国际化 Locale 解析器。
  * 优先级：网关 X-Locale 头（JWT中用户偏好） > Accept-Language 请求头 > 默认 zh。
+ * 仅在 SERVLET（WebMVC）环境下生效，WebFlux（Gateway）下不加载。
  */
 @Configuration
+@ConditionalOnWebApplication(type = Type.SERVLET)
+@ConditionalOnClass(LocaleResolver.class)
 public class LocaleConfig {
 
     @Bean

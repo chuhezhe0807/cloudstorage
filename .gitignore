@@ -35,8 +35,13 @@ build/
 ### VS Code ###
 .vscode/
 
+frontend/node_modules
+
 ### Mac OS ###
 .DS_Store
 
 ### Docker volumes ###
 data/
+
+.mvn
+mvnw.cmd
