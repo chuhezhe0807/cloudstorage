@@ -1,6 +1,8 @@
 package com.chuhezhe.core.storage.entity;
 
 import com.chuhezhe.common.entity.BaseEntity;
+import com.chuhezhe.core.storage.handler.JsonbTypeHandler;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,11 +12,12 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("outbox_event")
+@TableName(value = "outbox_event", autoResultMap = true)
 public class OutboxEvent extends BaseEntity {
 
     private String aggregateId;
     private String eventType;
+    @TableField(typeHandler = JsonbTypeHandler.class)
     private String payload;
     private String status;
     private Integer retries;
