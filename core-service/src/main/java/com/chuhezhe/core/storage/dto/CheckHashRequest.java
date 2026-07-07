@@ -19,4 +19,6 @@ public class CheckHashRequest {
 
     @Positive
     private long fileSize;
+
+    private long parentId;
 }

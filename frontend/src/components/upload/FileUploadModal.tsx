@@ -31,7 +31,7 @@ export default function FileUploadModal({ open, parentId, onClose, onSuccess }: 
       // 2. 秒传校验
       try {
         const { status } = await apiClient.post('/storage/check-hash', {
-          hash, fileName: file.name, fileSize: file.size,
+          hash, fileName: file.name, fileSize: file.size, parentId,
         });
         if (status === 200) {
           setFiles((prev) => prev.map((f, i) => i === idx ? { ...f, progress: 100, status: 'done' } : f));
@@ -42,7 +42,7 @@ export default function FileUploadModal({ open, parentId, onClose, onSuccess }: 
 
       // 3. 初始化分片上传
       const { data } = await apiClient.post('/storage/upload/init', {
-        fileName: file.name, totalSize: file.size, hash, chunkSize: CHUNK_SIZE,
+        fileName: file.name, totalSize: file.size, hash, chunkSize: CHUNK_SIZE, parentId,
       });
       const { uploadId, chunkUrls } = data.data;
 
@@ -64,9 +64,9 @@ export default function FileUploadModal({ open, parentId, onClose, onSuccess }: 
       setFiles((prev) => prev.map((f, i) => i === idx ? { ...f, progress: 100, status: 'done' } : f));
       onSuccess();
 
-    } catch (err) {
+    } catch (err: any) {
       setFiles((prev) => prev.map((f, i) => i === idx ? { ...f, status: 'error' } : f));
-      message.error(`Upload failed: ${file.name}`);
+      message.error(`${file.name} Upload failed: ${err.message}`);
     }
   };
 

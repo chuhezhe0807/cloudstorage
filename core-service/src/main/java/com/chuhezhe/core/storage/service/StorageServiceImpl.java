@@ -62,10 +62,11 @@ public class StorageServiceImpl implements StorageService {
         }
 
         // 秒传命中：建新 file_meta 引用，引用计数+1
+        long parentId = request.getParentId() > 0 ? request.getParentId() : 0L;
         FileMeta meta = new FileMeta();
         meta.setTenantId(tenantId);
         meta.setOwnerId(userId);
-        meta.setParentId(0L);
+        meta.setParentId(parentId);
         meta.setName(request.getFileName());
         meta.setPath("/" + request.getFileName());
         meta.setIsDir(false);
@@ -89,6 +90,7 @@ public class StorageServiceImpl implements StorageService {
     public UploadInitResponse initUpload(UploadInitRequest request) {
         Long tenantId = TenantContext.getTenantId();
         String fileName = request.getFileName();
+        long parentId = request.getParentId() > 0 ? request.getParentId() : 0L;
 
         // 安全校验
         FileSecurityUtil.validateFileName(fileName);
@@ -99,7 +101,7 @@ public class StorageServiceImpl implements StorageService {
         }
 
         // 校验文件名唯一性
-        if (fileMetaMapper.countByNameInParent(0L, fileName) > 0) {
+        if (fileMetaMapper.countByNameInParent(parentId, fileName) > 0) {
             throw new BusinessException(ErrorCode.NAME_CONFLICT);
         }
 
@@ -122,6 +124,7 @@ public class StorageServiceImpl implements StorageService {
         metaMap.put("totalChunks", String.valueOf(totalChunks));
         metaMap.put("hash", request.getHash() != null ? request.getHash() : "");
         metaMap.put("tenantPrefix", tenantPrefix);
+        metaMap.put("parentId", String.valueOf(parentId));
         redisTemplate.opsForHash().putAll(String.format(UPLOAD_META_KEY, uploadId), metaMap);
         redisTemplate.expire(String.format(UPLOAD_META_KEY, uploadId), Duration.ofHours(24));
 
@@ -184,6 +187,7 @@ public class StorageServiceImpl implements StorageService {
         int totalChunks = Integer.parseInt((String) meta.get("totalChunks"));
         String hash = (String) meta.get("hash");
         String tenantPrefix = (String) meta.get("tenantPrefix");
+        long parentId = Long.parseLong((String) meta.getOrDefault("parentId", "0"));
 
         // 校验全部分片已上传
         Set<String> uploadedSet = redisTemplate.opsForSet().members(chunksKey);
@@ -221,7 +225,7 @@ public class StorageServiceImpl implements StorageService {
         FileMeta metaEntity = new FileMeta();
         metaEntity.setTenantId(tenantId);
         metaEntity.setOwnerId(userId);
-        metaEntity.setParentId(0L);
+        metaEntity.setParentId(parentId);
         metaEntity.setName(fileName);
         metaEntity.setPath("/" + fileName);
         metaEntity.setIsDir(false);

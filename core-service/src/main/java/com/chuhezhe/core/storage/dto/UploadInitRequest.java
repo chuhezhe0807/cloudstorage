@@ -21,4 +21,6 @@ public class UploadInitRequest {
 
     /** 分片大小，默认 5MB */
     private long chunkSize = 5 * 1024 * 1024;
+
+    private long parentId;
 }
