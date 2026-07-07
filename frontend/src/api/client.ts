@@ -44,6 +44,12 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+    const backendData = error.response?.data;
+    if (backendData && backendData.message) {
+      const err = new Error(backendData.message);
+      (err as any).code = backendData.code;
+      return Promise.reject(err);
+    }
     return Promise.reject(error);
   }
 );
