@@ -7,12 +7,14 @@ import FileListPage from '../pages/files/FileListPage';
 import RecycleBinPage from '../pages/files/RecycleBinPage';
 import SearchPage from '../pages/files/SearchPage';
 import ShareManagementPage from '../pages/shares/ShareManagementPage';
+import ShareAccessPage from '../pages/shares/ShareAccessPage';
 import NotificationListPage from '../pages/notifications/NotificationListPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '/share/:code', element: <ShareAccessPage /> },
   {
     path: '/',
     element: <AuthGuard><MainLayout /></AuthGuard>,

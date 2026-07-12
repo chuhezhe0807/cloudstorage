@@ -24,6 +24,11 @@ export default function ShareManagementPage() {
   const [sharePassword, setSharePassword] = useState('');
   const [shareExpireAt, setShareExpireAt] = useState<string | null>(null);
   const [shareMaxDownloads, setShareMaxDownloads] = useState<number | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editPassword, setEditPassword] = useState('');
+  const [editExpireAt, setEditExpireAt] = useState<string | null>(null);
+  const [editMaxDownloads, setEditMaxDownloads] = useState<number | null>(null);
 
   const fetchShares = async () => {
     setLoading(true);
@@ -58,6 +63,30 @@ export default function ShareManagementPage() {
     } catch {}
   };
 
+  const openEditModal = (item: ShareItem) => {
+    setEditId(item.id);
+    setEditPassword('');
+    setEditExpireAt(item.expireAt);
+    setEditMaxDownloads(item.maxDownloads);
+    setEditOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editId) return;
+    try {
+      await apiClient.patch(`/shares/${editId}`, {
+        password: editPassword || undefined,
+        expireAt: editExpireAt || undefined,
+        maxDownloads: editMaxDownloads,
+      });
+      message.success('Share updated');
+      setEditOpen(false);
+      fetchShares();
+    } catch {
+      message.error('Update failed');
+    }
+  };
+
   const columns = [
     { title: 'File', dataIndex: 'fileName' },
     { title: t('share.code'), dataIndex: 'code' },
@@ -67,7 +96,8 @@ export default function ShareManagementPage() {
     { title: 'Status', dataIndex: 'status' },
     { title: 'Actions', key: 'actions', render: (_: unknown, r: ShareItem) => (
         <Space>
-          <Button size="small" onClick={() => { navigator.clipboard.writeText(r.code); message.success('Code copied'); }}>{t('common.copy')}</Button>
+          <Button size="small" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/share/${r.code}`); message.success('Link copied'); }}>{t('common.copy')}</Button>
+          {r.status === 'active' && <Button size="small" onClick={() => openEditModal(r)}>{t('common.edit')}</Button>}
           {r.status === 'active' && <Button size="small" danger onClick={() => handleCancel(r.id)}>{t('common.delete')}</Button>}
         </Space>
       )},
@@ -79,9 +109,29 @@ export default function ShareManagementPage() {
       <Table columns={columns} dataSource={shares} rowKey="id" loading={loading} />
       <Modal open={createOpen} title={t('share.create')} onOk={handleCreate} onCancel={() => setCreateOpen(false)}>
         <Input placeholder="File ID" value={shareFileId} onChange={(e) => setShareFileId(e.target.value)} className="mb-3" />
-        <Input placeholder={t('share.password') + ' (optional)'} value={sharePassword} onChange={(e) => setSharePassword(e.target.value)} className="mb-3" />
+        <Input placeholder={t('share.password') + ' (' + t('share.optional') + ')'} value={sharePassword} onChange={(e) => setSharePassword(e.target.value)} className="mb-3" />
         <DatePicker showTime placeholder={t('share.expire')} onChange={(d) => setShareExpireAt(d?.toISOString() || null)} className="mb-3 w-full" />
         <Input type="number" placeholder={t('share.maxDownloads')} onChange={(e) => setShareMaxDownloads(Number(e.target.value) || null)} />
+      </Modal>
+      <Modal open={editOpen} title={t('share.update')} onOk={handleUpdate} onCancel={() => setEditOpen(false)}>
+        <Input
+          placeholder={t('share.password') + ' (' + t('share.leaveEmpty') + ')'}
+          value={editPassword}
+          onChange={(e) => setEditPassword(e.target.value)}
+          className="mb-3"
+        />
+        <DatePicker
+          showTime
+          placeholder={t('share.expire')}
+          onChange={(d) => setEditExpireAt(d?.toISOString() || null)}
+          className="mb-3 w-full"
+        />
+        <Input
+          type="number"
+          placeholder={t('share.maxDownloads')}
+          value={editMaxDownloads ?? ''}
+          onChange={(e) => setEditMaxDownloads(e.target.value ? Number(e.target.value) : null)}
+        />
       </Modal>
     </div>
   );

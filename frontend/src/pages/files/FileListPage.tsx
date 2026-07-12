@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Breadcrumb, Space, Modal, Input, App } from 'antd';
-import { HomeOutlined, UploadOutlined, FolderAddOutlined } from '@ant-design/icons';
+import { Table, Button, Breadcrumb, Space, Modal, Input, App, DatePicker } from 'antd';
+import { HomeOutlined, UploadOutlined, FolderAddOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/client';
 import FileUploadModal from '../../components/upload/FileUploadModal';
@@ -26,6 +26,11 @@ export default function FileListPage() {
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameId, setRenameId] = useState<number | null>(null);
   const [renameName, setRenameName] = useState('');
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareFileId, setShareFileId] = useState<number | null>(null);
+  const [sharePassword, setSharePassword] = useState('');
+  const [shareExpireAt, setShareExpireAt] = useState<string | null>(null);
+  const [shareMaxDownloads, setShareMaxDownloads] = useState<number | null>(null);
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -95,6 +100,33 @@ export default function FileListPage() {
     }
   };
 
+  const openShareModal = (id: number) => {
+    setShareFileId(id);
+    setSharePassword('');
+    setShareExpireAt(null);
+    setShareMaxDownloads(null);
+    setShareOpen(true);
+  };
+
+  const handleShare = async () => {
+    if (!shareFileId) return;
+    try {
+      const { data } = await apiClient.post('/shares', {
+        fileId: shareFileId,
+        password: sharePassword || undefined,
+        expireAt: shareExpireAt || undefined,
+        maxDownloads: shareMaxDownloads || undefined,
+      });
+      const shareCode = data.data?.code;
+      const shareUrl = `${window.location.origin}/share/${shareCode}`;
+      navigator.clipboard.writeText(shareUrl);
+      message.success(t('share.createSuccess'));
+      setShareOpen(false);
+    } catch {
+      message.error(t('share.createFailed'));
+    }
+  };
+
   const columns = [
     { title: t('file.name'), dataIndex: 'name', key: 'name', render: (_: string, r: FileItem) =>
         r.isDir ? <Button type="link" onClick={() => enterFolder(r.id, r.name)}>{r.name}</Button> : r.name },
@@ -103,6 +135,7 @@ export default function FileListPage() {
     { title: 'Actions', key: 'actions', render: (_: unknown, r: FileItem) => (
         <Space>
           <Button size="small" onClick={() => { setRenameId(r.id); setRenameName(r.name); setRenameOpen(true); }}>{t('common.rename')}</Button>
+          <Button size="small" icon={<ShareAltOutlined />} onClick={() => openShareModal(r.id)}>{t('common.share')}</Button>
           <Button size="small" danger onClick={() => handleDelete(r.id)}>{t('common.delete')}</Button>
           {!r.isDir && <Button size="small" onClick={() => handleDownload(r.id)}>{t('common.download')}</Button>}
         </Space>
@@ -123,6 +156,25 @@ export default function FileListPage() {
       </Modal>
       <Modal open={renameOpen} title={t('common.rename')} onOk={handleRename} onCancel={() => setRenameOpen(false)}>
         <Input value={renameName} onChange={(e) => setRenameName(e.target.value)} />
+      </Modal>
+      <Modal open={shareOpen} title={t('share.create')} onOk={handleShare} onCancel={() => setShareOpen(false)}>
+        <Input
+          placeholder={t('share.password') + ' (' + t('share.optional') + ')'}
+          value={sharePassword}
+          onChange={(e) => setSharePassword(e.target.value)}
+          className="mb-3"
+        />
+        <DatePicker
+          showTime
+          placeholder={t('share.expire')}
+          onChange={(d) => setShareExpireAt(d?.toISOString() || null)}
+          className="mb-3 w-full"
+        />
+        <Input
+          type="number"
+          placeholder={t('share.maxDownloads')}
+          onChange={(e) => setShareMaxDownloads(Number(e.target.value) || null)}
+        />
       </Modal>
       <FileUploadModal open={uploadOpen} parentId={parentId} onClose={() => setUploadOpen(false)} onSuccess={fetchFiles} />
     </div>
