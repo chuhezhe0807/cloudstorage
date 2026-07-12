@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Modal, Upload, Progress, List, Button, App } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -20,9 +20,18 @@ export default function FileUploadModal({ open, parentId, onClose, onSuccess }: 
   const { message } = App.useApp();
   const [files, setFiles] = useState<{ name: string; progress: number; status: string }[]>([]);
   const cancelRef = useRef(false);
+  const idxRef = useRef(0);
+
+  useEffect(() => {
+    if (open) {
+      idxRef.current = 0;
+      setFiles([]);
+      cancelRef.current = false;
+    }
+  }, [open]);
 
   const uploadFile = async (file: File) => {
-    const idx = files.length;
+    const idx = idxRef.current++;
     setFiles((prev) => [...prev, { name: file.name, progress: 0, status: 'uploading' }]);
 
     try {
