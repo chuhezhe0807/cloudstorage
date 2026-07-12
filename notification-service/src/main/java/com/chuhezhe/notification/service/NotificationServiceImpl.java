@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,7 +81,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (notification == null || !userId.equals(notification.getUserId())) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
-        notification.setReadAt(LocalDateTime.now());
+        notification.setReadAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
         notificationMapper.updateById(notification);
     }
 

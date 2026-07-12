@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -159,7 +160,7 @@ public class FileServiceImpl implements FileService {
         FileMeta file = getFileWithCheck(fileId, STATUS_ACTIVE);
 
         file.setStatus(STATUS_RECYCLED);
-        file.setDeletedAt(LocalDateTime.now());
+        file.setDeletedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
         fileMetaMapper.updateById(file);
 
         // 如果是目录，递归软删除子节点
@@ -168,7 +169,7 @@ public class FileServiceImpl implements FileService {
             List<FileMeta> children = fileMetaMapper.listByPathPrefix(prefix);
             for (FileMeta child : children) {
                 child.setStatus(STATUS_RECYCLED);
-                child.setDeletedAt(LocalDateTime.now());
+                child.setDeletedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
                 fileMetaMapper.updateById(child);
             }
         }
@@ -179,7 +180,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public PageResult<FileMetaVO> listRecycled(int page, int size) {
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(30);
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(30).truncatedTo(ChronoUnit.MINUTES);
         List<FileMeta> all = fileMetaMapper.listRecycled(cutoff);
 
         int total = all.size();
