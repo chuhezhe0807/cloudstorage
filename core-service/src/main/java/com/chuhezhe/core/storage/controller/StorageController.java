@@ -65,9 +65,9 @@ public class StorageController {
         return Result.ok(storageService.completeUpload(uploadId));
     }
 
-    /** 下载文件：302 重定向到 MinIO 预签名 GET URL */
+    /** 下载文件：返回 MinIO 预签名 GET URL，前端自行下载 */
     @GetMapping("/download/{fileId}")
-    public ResponseEntity<Void> download(@PathVariable Long fileId) {
+    public Result<DownloadUrlResponse> download(@PathVariable Long fileId) {
         Long tenantId = TenantContext.getTenantId();
         FileMeta fileMeta = fileMetaMapper.selectById(fileId);
         if (fileMeta == null || !tenantId.equals(fileMeta.getTenantId())) {
@@ -75,8 +75,6 @@ public class StorageController {
         }
 
         String presignedUrl = minioService.presignedGetUrl(fileMeta.getContentRef(), DOWNLOAD_TTL_SECONDS);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, presignedUrl)
-                .build();
+        return Result.ok(new DownloadUrlResponse(presignedUrl, fileMeta.getName()));
     }
 }
