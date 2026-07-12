@@ -23,6 +23,7 @@
   "common.confirm": "Confirm",
   "common.cancel": "Cancel",
   "common.delete": "Delete",
+  "common.confirmDelete": "Confirm delete?",
   "common.rename": "Rename",
   "common.move": "Move",
   "common.share": "Share",

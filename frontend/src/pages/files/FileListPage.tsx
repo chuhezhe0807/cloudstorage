@@ -73,12 +73,17 @@ export default function FileListPage() {
     } catch {}
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await apiClient.delete(`/files/${id}`);
-      message.success('Deleted');
-      fetchFiles();
-    } catch {}
+  const handleDelete = (id: number) => {
+    Modal.confirm({
+      title: t('common.confirmDelete'),
+      onOk: async () => {
+        try {
+          await apiClient.delete(`/files/${id}`);
+          message.success('Deleted');
+          fetchFiles();
+        } catch {}
+      },
+    });
   };
 
   const handleDownload = async (id: number) => {
