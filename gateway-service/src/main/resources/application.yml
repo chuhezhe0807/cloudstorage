@@ -31,7 +31,7 @@ spring:
             - Path=/api/notifications/**
     sentinel:
       transport:
-        dashboard: localhost:8080
+        dashboard: localhost:9080
 
 server:
   port: 8080
