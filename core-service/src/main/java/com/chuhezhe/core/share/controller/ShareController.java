@@ -25,6 +25,12 @@ public class ShareController {
         return Result.ok(shareService.create(request));
     }
 
+    /** 查看分享基本信息（无需登录，网关白名单放行） */
+    @GetMapping("/{code}/info")
+    public Result<ShareInfoResponse> info(@PathVariable String code) {
+        return Result.ok(shareService.getShareInfo(code));
+    }
+
     /** 访问分享（无需登录，网关白名单放行） */
     @PostMapping("/{code}/access")
     public Result<ShareAccessResponse> access(@PathVariable String code,

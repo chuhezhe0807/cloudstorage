@@ -92,7 +92,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return true;
         }
         for (String prefix : SHARE_ACCESS_PREFIX) {
-            if (path.startsWith(prefix) && path.endsWith("/access")) {
+            if (path.startsWith(prefix) && (path.endsWith("/access") || path.endsWith("/info"))) {
                 return true;
             }
         }

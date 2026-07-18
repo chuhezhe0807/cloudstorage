@@ -82,6 +82,35 @@ public class ShareServiceImpl implements ShareService {
     // ==================== 访问 ====================
 
     @Override
+    public ShareInfoResponse getShareInfo(String code) {
+        ShareLink link = shareLinkMapper.findByCode(code);
+        if (link == null || !"active".equals(link.getStatus())) {
+            throw new BusinessException(ErrorCode.SHARE_NOT_FOUND);
+        }
+
+        if (link.getExpireAt() != null && link.getExpireAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.SHARE_EXPIRED);
+        }
+
+        if (link.getMaxDownloads() != null && link.getDownloadCount() >= link.getMaxDownloads()) {
+            throw new BusinessException(ErrorCode.SHARE_EXHAUSTED);
+        }
+
+        FileMeta fileMeta = queryFileWithShareTenant(link);
+        if (fileMeta == null) {
+            throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
+        }
+
+        return new ShareInfoResponse(
+                fileMeta.getName(),
+                fileMeta.getSize() != null ? fileMeta.getSize() : 0L,
+                Boolean.TRUE.equals(fileMeta.getIsDir()),
+                link.getExpireAt(),
+                link.getMaxDownloads(),
+                link.getDownloadCount());
+    }
+
+    @Override
     @Transactional
     public ShareAccessResponse access(String code, ShareAccessRequest request) {
         // 提取码爆破保护
@@ -92,7 +121,7 @@ public class ShareServiceImpl implements ShareService {
 
         ShareLink link = shareLinkMapper.findByCode(code);
         if (link == null || !"active".equals(link.getStatus())) {
-            throw new BusinessException(ErrorCode.INVALID_SHARE_CODE);
+            throw new BusinessException(ErrorCode.SHARE_NOT_FOUND);
         }
 
         // 过期校验
@@ -117,7 +146,7 @@ public class ShareServiceImpl implements ShareService {
         clearShareFail(code);
 
         // 查询文件信息
-        FileMeta fileMeta = fileMetaMapper.selectById(link.getFileId());
+        FileMeta fileMeta = queryFileWithShareTenant(link);
         if (fileMeta == null) {
             throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
@@ -222,6 +251,16 @@ public class ShareServiceImpl implements ShareService {
     private void clearShareFail(String code) {
         redisTemplate.delete(String.format(SHARE_FAIL_KEY, code));
         redisTemplate.delete(String.format(SHARE_LOCK_KEY, code));
+    }
+
+    private FileMeta queryFileWithShareTenant(ShareLink link) {
+        Long originalTenantId = TenantContext.getTenantId();
+        try {
+            TenantContext.setTenantId(link.getTenantId());
+            return fileMetaMapper.selectById(link.getFileId());
+        } finally {
+            TenantContext.setTenantId(originalTenantId);
+        }
     }
 
     private ShareVO toVO(ShareLink link, FileMeta file, boolean hasPassword) {

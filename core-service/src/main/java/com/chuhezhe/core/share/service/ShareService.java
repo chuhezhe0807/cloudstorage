@@ -9,6 +9,9 @@ public interface ShareService {
     /** 创建分享链接 */
     ShareVO create(CreateShareRequest request);
 
+    /** 查看分享基本信息（无需提取码） */
+    ShareInfoResponse getShareInfo(String code);
+
     /** 访问分享（校验提取码、过期、次数），返回文件信息 + 下载 URL */
     ShareAccessResponse access(String code, ShareAccessRequest request);
 

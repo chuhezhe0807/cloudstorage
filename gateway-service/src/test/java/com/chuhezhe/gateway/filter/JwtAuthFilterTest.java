@@ -65,6 +65,16 @@ class JwtAuthFilterTest {
     }
 
     @Test
+    void shareInfoPasses() {
+        ServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get("/api/shares/abc123/info").build());
+        GatewayFilterChain chain = (e) -> Mono.empty();
+
+        Mono<Void> result = filter.filter(exchange, chain);
+        assertNotNull(result);
+    }
+
+    @Test
     void missingTokenReturns401() {
         ServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/api/files").build());

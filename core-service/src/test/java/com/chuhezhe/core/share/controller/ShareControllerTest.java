@@ -61,6 +61,18 @@ class ShareControllerTest {
     }
 
     @Test
+    void shareInfoReturnsResponse() throws Exception {
+        ShareInfoResponse resp = new ShareInfoResponse("test.txt", 1024, false, null, 10, 1);
+
+        when(shareService.getShareInfo("abc123")).thenReturn(resp);
+
+        mockMvc.perform(get("/api/shares/abc123/info"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.fileName").value("test.txt"))
+                .andExpect(jsonPath("$.data.fileSize").value(1024));
+    }
+
+    @Test
     void listMySharesReturnsList() throws Exception {
         ShareVO vo = new ShareVO();
         vo.setId(1L);

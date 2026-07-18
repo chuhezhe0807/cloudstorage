@@ -38,7 +38,8 @@ public enum ErrorCode {
     SHARE_EXHAUSTED(4002, "error.share_exhausted"),
     SHARE_LOCKED(4003, "error.share_locked"),
     INVALID_SHARE_CODE(4004, "error.invalid_share_code"),
-    INVALID_SHARE_PASSWORD(4005, "error.invalid_share_password");
+    INVALID_SHARE_PASSWORD(4005, "error.invalid_share_password"),
+    SHARE_NOT_FOUND(4006, "error.share_not_found");
 
     private final int code;
     private final String i18nKey;

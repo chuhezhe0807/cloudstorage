@@ -60,6 +60,9 @@ public class GlobalExceptionHandler {
     }
 
     private HttpStatus mapHttpStatus(int code) {
+        if (code == 4003) return HttpStatus.TOO_MANY_REQUESTS;
+        if (code == 4004 || code == 4006) return HttpStatus.NOT_FOUND;
+        if (code == 4005) return HttpStatus.FORBIDDEN;
         if (code >= 1000 && code < 2000) return HttpStatus.CONFLICT;
         if (code >= 2000 && code < 3000) return HttpStatus.BAD_REQUEST;
         if (code >= 3000 && code < 4000) return HttpStatus.BAD_REQUEST;
