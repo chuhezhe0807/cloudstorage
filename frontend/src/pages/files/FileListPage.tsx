@@ -91,10 +91,24 @@ export default function FileListPage() {
     });
   };
 
-  const handleDownload = async (id: string) => {
+  const handleDownload = async (id: string, isDir: boolean) => {
     try {
-      const { data } = await apiClient.get(`/storage/download/${id}`);
-      window.open(data.data?.downloadUrl || `/api/storage/download/${id}`, '_blank');
+      if (isDir) {
+        const response = await apiClient.post('/storage/download-batch', { fileIds: [id] }, {
+          responseType: 'blob',
+        });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'download.zip');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        const { data } = await apiClient.get(`/storage/download/${id}`);
+        window.open(data.data?.downloadUrl || `/api/storage/download/${id}`, '_blank');
+      }
     } catch {
       message.error('Download failed');
     }
@@ -137,7 +151,8 @@ export default function FileListPage() {
           <Button size="small" onClick={() => { setRenameId(r.id); setRenameName(r.name); setRenameOpen(true); }}>{t('common.rename')}</Button>
           <Button size="small" icon={<ShareAltOutlined />} onClick={() => openShareModal(r.id)}>{t('common.share')}</Button>
           <Button size="small" danger onClick={() => handleDelete(r.id)}>{t('common.delete')}</Button>
-          {!r.isDir && <Button size="small" onClick={() => handleDownload(r.id)}>{t('common.download')}</Button>}
+          {r.isDir && <Button size="small" onClick={() => handleDownload(r.id, true)}>{t('common.download')}</Button>}
+          {(!r.isDir) && <Button size="small" onClick={() => handleDownload(r.id, false)}>{t('common.download')}</Button>}
         </Space>
       )},
   ];

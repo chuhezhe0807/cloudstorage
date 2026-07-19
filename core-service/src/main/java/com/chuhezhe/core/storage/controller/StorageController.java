@@ -9,12 +9,16 @@ import com.chuhezhe.core.file.mapper.FileMetaMapper;
 import com.chuhezhe.core.storage.dto.*;
 import com.chuhezhe.core.storage.service.MinioService;
 import com.chuhezhe.core.storage.service.StorageService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 存储接口：秒传、分片上传、下载。
@@ -76,5 +80,21 @@ public class StorageController {
 
         String presignedUrl = minioService.presignedGetUrl(fileMeta.getContentRef(), DOWNLOAD_TTL_SECONDS);
         return Result.ok(new DownloadUrlResponse(presignedUrl, fileMeta.getName()));
+    }
+
+    /** 批量下载（文件夹打包为 zip） */
+    @PostMapping("/download-batch")
+    public void downloadBatch(@RequestBody BatchDownloadRequest request,
+                               HttpServletResponse response) throws IOException {
+        byte[] zipData = storageService.downloadFiles(request.getFileIds());
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String filename = "download_" + timestamp + ".zip";
+
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        response.setContentLength(zipData.length);
+        response.getOutputStream().write(zipData);
+        response.getOutputStream().flush();
     }
 }

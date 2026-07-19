@@ -41,6 +41,7 @@ public class StorageServiceImpl implements StorageService {
     private final OutboxEventMapper outboxEventMapper;
     private final ObjectMapper objectMapper;
     private final StringRedisTemplate redisTemplate;
+    private final FileZipService fileZipService;
 
     // ==================== 秒传 ====================
 
@@ -245,6 +246,13 @@ public class StorageServiceImpl implements StorageService {
         log.info("上传完成: uploadId={}, fileId={}, size={}", uploadId, metaEntity.getId(), totalSize);
         publishEvent(metaEntity.getId(), "upload.completed", metaEntity);
         return new FileUploadResponse(metaEntity.getId(), fileName, totalSize, false);
+    }
+
+    // ==================== 批量下载 ====================
+
+    @Override
+    public byte[] downloadFiles(List<Long> fileIds) {
+        return fileZipService.zipFiles(fileIds);
     }
 
     // ==================== 私有方法 ====================
