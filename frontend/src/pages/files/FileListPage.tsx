@@ -6,7 +6,7 @@ import apiClient from '../../api/client';
 import FileUploadModal from '../../components/upload/FileUploadModal';
 
 interface FileItem {
-  id: number;
+  id: string;
   name: string;
   isDir: boolean;
   size: number;
@@ -17,17 +17,17 @@ export default function FileListPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [files, setFiles] = useState<FileItem[]>([]);
-  const [parentId, setParentId] = useState<number>(0);
-  const [breadcrumb, setBreadcrumb] = useState<{ id: number; name: string }[]>([{ id: 0, name: 'Root' }]);
+  const [parentId, setParentId] = useState<string>('0');
+  const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([{ id: '0', name: 'Root' }]);
   const [loading, setLoading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [mkdirOpen, setMkdirOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [renameOpen, setRenameOpen] = useState(false);
-  const [renameId, setRenameId] = useState<number | null>(null);
+  const [renameId, setRenameId] = useState<string | null>(null);
   const [renameName, setRenameName] = useState('');
   const [shareOpen, setShareOpen] = useState(false);
-  const [shareFileId, setShareFileId] = useState<number | null>(null);
+  const [shareFileId, setShareFileId] = useState<string | null>(null);
   const [sharePassword, setSharePassword] = useState('');
   const [shareExpireAt, setShareExpireAt] = useState<string | null>(null);
   const [shareMaxDownloads, setShareMaxDownloads] = useState<number | null>(null);
@@ -47,7 +47,7 @@ export default function FileListPage() {
     fetchFiles();
   }, [fetchFiles]);
 
-  const enterFolder = (id: number, name: string) => {
+  const enterFolder = (id: string, name: string) => {
     setParentId(id);
     setBreadcrumb((prev) => [...prev, { id, name }]);
   };
@@ -78,7 +78,7 @@ export default function FileListPage() {
     } catch {}
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     Modal.confirm({
       title: t('common.confirmDelete'),
       onOk: async () => {
@@ -91,7 +91,7 @@ export default function FileListPage() {
     });
   };
 
-  const handleDownload = async (id: number) => {
+  const handleDownload = async (id: string) => {
     try {
       const { data } = await apiClient.get(`/storage/download/${id}`);
       window.open(data.data?.downloadUrl || `/api/storage/download/${id}`, '_blank');
@@ -100,7 +100,7 @@ export default function FileListPage() {
     }
   };
 
-  const openShareModal = (id: number) => {
+  const openShareModal = (id: string) => {
     setShareFileId(id);
     setSharePassword('');
     setShareExpireAt(null);

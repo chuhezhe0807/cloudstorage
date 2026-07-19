@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/client';
 
 interface FileItem {
-  id: number;
+  id: string;
   name: string;
   size: number;
   deletedAt: string;
@@ -29,7 +29,7 @@ export default function RecycleBinPage() {
 
   useEffect(() => { fetchRecycled(); }, []);
 
-  const handleRestore = async (id: number) => {
+  const handleRestore = async (id: string) => {
     try {
       await apiClient.put(`/files/${id}/restore`);
       message.success(t('common.restore'));
@@ -37,7 +37,7 @@ export default function RecycleBinPage() {
     } catch {}
   };
 
-  const handlePermanentDelete = async (id: number) => {
+  const handlePermanentDelete = async (id: string) => {
     try {
       await apiClient.delete(`/files/${id}/permanent`);
       message.success('Permanently deleted');

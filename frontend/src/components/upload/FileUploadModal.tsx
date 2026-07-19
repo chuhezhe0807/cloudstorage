@@ -10,7 +10,7 @@ const CHUNK_SIZE = 5 * 1024 * 1024;
 
 interface Props {
   open: boolean;
-  parentId: number;
+  parentId: string;
   onClose: () => void;
   onSuccess: () => void;
 }

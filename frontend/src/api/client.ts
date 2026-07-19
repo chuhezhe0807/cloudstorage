@@ -1,23 +1,9 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-const BIGINT_RE = /(?<=["\[\]:,\s])(\d{16,})(?=[\s,\]}"])/g;
-
-function transformResponse(data: unknown) {
-  if (typeof data === 'string') {
-    try {
-      return JSON.parse(data.replace(BIGINT_RE, '"$1"'));
-    } catch {
-      return data;
-    }
-  }
-  return data;
-}
-
 const apiClient = axios.create({
   baseURL: '/api',
-  timeout: 30000,
-  transformResponse: [transformResponse],
+  timeout: 30000
 });
 
 // 请求拦截器：注入 JWT + Accept-Language

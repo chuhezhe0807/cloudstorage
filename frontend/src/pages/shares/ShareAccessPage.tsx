@@ -7,7 +7,7 @@ import apiClient from '../../api/client';
 
 interface ShareInfo {
   fileName: string;
-  fileSize: number;
+  fileSize: string;
   isDir: boolean;
   hasPassword: boolean;
   expireAt: string | null;

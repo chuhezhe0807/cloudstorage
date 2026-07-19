@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/client';
 
 interface NotifItem {
-  id: number;
+  id: string;
   type: string;
   payload: string;
   read: boolean;
@@ -28,14 +28,14 @@ export default function NotificationListPage() {
 
   useEffect(() => { fetchNotifs(); }, []);
 
-  const markRead = async (id: number) => {
+  const markRead = async (id: string) => {
     try {
       await apiClient.put(`/notifications/${id}/read`);
       fetchNotifs();
     } catch {}
   };
 
-  const handleDelete = async (ids: number[]) => {
+  const handleDelete = async (ids: string[]) => {
     try {
       await apiClient.delete('/notifications', { params: { ids: ids.join(',') } });
       message.success('Deleted');

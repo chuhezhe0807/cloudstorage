@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.chuhezhe.common.context.TenantContext;
 import com.chuhezhe.common.context.TenantContextFilter;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +19,18 @@ import org.springframework.core.Ordered;
 import java.util.Set;
 
 /**
- * 公共自动配置：注册 TenantContextFilter + MyBatis-Plus 多租户插件。
+ * 公共自动配置：注册 TenantContextFilter + MyBatis-Plus 多租户插件 + Jackson Long 序列化为字符串。
  */
 @Configuration
 public class CommonAutoConfiguration {
+
+    @Bean
+    @ConditionalOnClass(Jackson2ObjectMapperBuilderCustomizer.class)
+    public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
+        return builder -> builder
+                .serializerByType(Long.class, ToStringSerializer.instance)
+                .serializerByType(Long.TYPE, ToStringSerializer.instance);
+    }
 
     /** 注册 TenantContextFilter，仅 Servlet 环境生效（Gateway 使用 Reactive） */
     @Bean

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/client';
 
 interface ShareItem {
-  id: number;
+  id: string;
   code: string;
   fileName: string;
   hasPassword: boolean;
@@ -25,7 +25,7 @@ export default function ShareManagementPage() {
   const [shareExpireAt, setShareExpireAt] = useState<string | null>(null);
   const [shareMaxDownloads, setShareMaxDownloads] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [editPassword, setEditPassword] = useState('');
   const [editExpireAt, setEditExpireAt] = useState<string | null>(null);
   const [editMaxDownloads, setEditMaxDownloads] = useState<number | null>(null);
@@ -44,7 +44,7 @@ export default function ShareManagementPage() {
   const handleCreate = async () => {
     try {
       await apiClient.post('/shares', {
-        fileId: Number(shareFileId),
+        fileId: shareFileId,
         password: sharePassword || undefined,
         expireAt: shareExpireAt || undefined,
         maxDownloads: shareMaxDownloads || undefined,
@@ -55,7 +55,7 @@ export default function ShareManagementPage() {
     } catch {}
   };
 
-  const handleCancel = async (id: number) => {
+  const handleCancel = async (id: string) => {
     try {
       await apiClient.delete(`/shares/${id}`);
       message.success('Share cancelled');

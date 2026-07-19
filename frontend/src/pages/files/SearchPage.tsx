@@ -5,7 +5,7 @@ import apiClient from '../../api/client';
 import { SearchOutlined } from '@ant-design/icons';
 
 interface FileItem {
-  id: number;
+  id: string;
   name: string;
   isDir: boolean;
   size: number;
