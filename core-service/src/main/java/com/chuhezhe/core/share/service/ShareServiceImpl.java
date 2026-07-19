@@ -220,15 +220,7 @@ public class ShareServiceImpl implements ShareService {
                 ZipOutputStream zos = new ZipOutputStream(baos);
 
                 for (FileMeta file : filesToDownload) {
-                    String entryName;
-                    if (filesToDownload.size() == 1) {
-                        entryName = file.getName();
-                    } else {
-                        String relativePath = file.getPath().substring(rootPath.length());
-                        entryName = relativePath.endsWith("/") ? relativePath.substring(0, relativePath.length() - 1) : relativePath;
-                    }
-
-                    ZipEntry entry = new ZipEntry(entryName);
+                    ZipEntry entry = new ZipEntry(file.getName());
                     zos.putNextEntry(entry);
 
                     InputStream is = minioService.getObjectStream(file.getContentRef());
