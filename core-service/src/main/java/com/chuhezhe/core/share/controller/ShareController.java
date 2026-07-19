@@ -3,15 +3,16 @@ package com.chuhezhe.core.share.controller;
 import com.chuhezhe.common.result.Result;
 import com.chuhezhe.core.share.dto.*;
 import com.chuhezhe.core.share.service.ShareService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * 分享接口：创建、访问、管理。
- */
 @RestController
 @RequestMapping("/api/shares")
 @RequiredArgsConstructor
@@ -19,19 +20,16 @@ public class ShareController {
 
     private final ShareService shareService;
 
-    /** 创建分享链接（需登录） */
     @PostMapping
     public Result<ShareVO> create(@Valid @RequestBody CreateShareRequest request) {
         return Result.ok(shareService.create(request));
     }
 
-    /** 查看分享基本信息（无需登录，网关白名单放行） */
     @GetMapping("/{code}/info")
     public Result<ShareInfoResponse> info(@PathVariable String code) {
         return Result.ok(shareService.getShareInfo(code));
     }
 
-    /** 访问分享（无需登录，网关白名单放行） */
     @PostMapping("/{code}/access")
     public Result<ShareAccessResponse> access(@PathVariable String code,
                                                @RequestBody(required = false) ShareAccessRequest request) {
@@ -41,20 +39,33 @@ public class ShareController {
         return Result.ok(shareService.access(code, request));
     }
 
-    /** 我的分享列表（需登录） */
+    @PostMapping("/{code}/download")
+    public void download(@PathVariable String code,
+                         @RequestBody ShareDownloadRequest request,
+                         HttpServletResponse response) throws IOException {
+        byte[] zipData = shareService.downloadFiles(code, request.getFileIds());
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String filename = "share_" + code + "_" + timestamp + ".zip";
+
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        response.setContentLength(zipData.length);
+        response.getOutputStream().write(zipData);
+        response.getOutputStream().flush();
+    }
+
     @GetMapping
     public Result<List<ShareVO>> listMyShares() {
         return Result.ok(shareService.listMyShares());
     }
 
-    /** 取消分享 */
     @DeleteMapping("/{id}")
     public Result<Void> cancel(@PathVariable Long id) {
         shareService.cancel(id);
         return Result.ok();
     }
 
-    /** 更新分享设置 */
     @PatchMapping("/{id}")
     public Result<ShareVO> update(@PathVariable Long id, @RequestBody UpdateShareRequest request) {
         return Result.ok(shareService.update(id, request));

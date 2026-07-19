@@ -95,6 +95,7 @@ class ShareServiceImplTest {
         link.setStatus("active");
         link.setDownloadCount(2);
         link.setMaxDownloads(10);
+        link.setPasswordHash("$2a$10$hash");
 
         FileMeta file = new FileMeta();
         file.setId(1L);
@@ -110,6 +111,7 @@ class ShareServiceImplTest {
         assertEquals("test.txt", result.getFileName());
         assertEquals(1024L, result.getFileSize());
         assertFalse(result.isDir());
+        assertTrue(result.isHasPassword());
         assertEquals(10, result.getMaxDownloads());
         assertEquals(2, result.getDownloadCount());
     }

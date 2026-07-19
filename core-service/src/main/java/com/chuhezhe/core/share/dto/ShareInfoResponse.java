@@ -12,6 +12,7 @@ public class ShareInfoResponse {
     private String fileName;
     private long fileSize;
     private boolean isDir;
+    private boolean hasPassword;
     private LocalDateTime expireAt;
     private Integer maxDownloads;
     private Integer downloadCount;

@@ -49,7 +49,12 @@ class ShareControllerTest {
 
     @Test
     void accessShareReturnsDownloadUrl() throws Exception {
-        ShareAccessResponse resp = new ShareAccessResponse(1L, "test.txt", 1024, "http://minio/dl", 9);
+        ShareAccessResponse resp = new ShareAccessResponse();
+        resp.setFileId(1L);
+        resp.setFileName("test.txt");
+        resp.setFileSize(1024);
+        resp.setDir(false);
+        resp.setDownloadUrl("http://minio/dl");
 
         when(shareService.access(eq("abc123"), any())).thenReturn(resp);
 
@@ -62,14 +67,29 @@ class ShareControllerTest {
 
     @Test
     void shareInfoReturnsResponse() throws Exception {
-        ShareInfoResponse resp = new ShareInfoResponse("test.txt", 1024, false, null, 10, 1);
+        ShareInfoResponse resp = new ShareInfoResponse("test.txt", 1024, false, true, null, 10, 1);
 
         when(shareService.getShareInfo("abc123")).thenReturn(resp);
 
         mockMvc.perform(get("/api/shares/abc123/info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.fileName").value("test.txt"))
-                .andExpect(jsonPath("$.data.fileSize").value(1024));
+                .andExpect(jsonPath("$.data.fileSize").value(1024))
+                .andExpect(jsonPath("$.data.hasPassword").value(true));
+    }
+
+    @Test
+    void downloadShareReturnsZip() throws Exception {
+        when(shareService.downloadFiles(eq("abc123"), anyList())).thenReturn(new byte[]{1, 2, 3});
+
+        ShareDownloadRequest req = new ShareDownloadRequest();
+        req.setFileIds(List.of(1L, 2L));
+
+        mockMvc.perform(post("/api/shares/abc123/download")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString(".zip")));
     }
 
     @Test

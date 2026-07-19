@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +126,18 @@ public class MinioService {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /** 获取对象输入流 */
+    public InputStream getObjectStream(String objectKey) {
+        try {
+            return minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(minioConfig.getBucket())
+                    .object(objectKey)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("获取对象流失败: " + objectKey, e);
         }
     }
 }

@@ -15,7 +15,8 @@ public interface ShareService {
     /** 访问分享（校验提取码、过期、次数），返回文件信息 + 下载 URL */
     ShareAccessResponse access(String code, ShareAccessRequest request);
 
-    /** 我的分享列表 */
+    byte[] downloadFiles(String code, List<Long> fileIds);
+
     List<ShareVO> listMyShares();
 
     /** 取消分享 */

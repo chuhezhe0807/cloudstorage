@@ -16,15 +16,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-/**
- * 分享服务：创建链接、访问校验、管理。
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -105,6 +107,7 @@ public class ShareServiceImpl implements ShareService {
                 fileMeta.getName(),
                 fileMeta.getSize() != null ? fileMeta.getSize() : 0L,
                 Boolean.TRUE.equals(fileMeta.getIsDir()),
+                link.getPasswordHash() != null,
                 link.getExpireAt(),
                 link.getMaxDownloads(),
                 link.getDownloadCount());
@@ -113,7 +116,6 @@ public class ShareServiceImpl implements ShareService {
     @Override
     @Transactional
     public ShareAccessResponse access(String code, ShareAccessRequest request) {
-        // 提取码爆破保护
         String lockKey = String.format(SHARE_LOCK_KEY, code);
         if (Boolean.TRUE.equals(redisTemplate.hasKey(lockKey))) {
             throw new BusinessException(ErrorCode.SHARE_LOCKED);
@@ -151,17 +153,106 @@ public class ShareServiceImpl implements ShareService {
             throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
 
-        // 签发预签名下载 URL
-        String downloadUrl = minioService.presignedGetUrl(fileMeta.getContentRef(), DOWNLOAD_TTL_SECONDS);
-
-        // 递增下载次数
         link.setDownloadCount(link.getDownloadCount() + 1);
         shareLinkMapper.updateById(link);
 
-        log.info("分享访问成功: code={}, fileId={}", code, link.getFileId());
-        return new ShareAccessResponse(
-                fileMeta.getId(), fileMeta.getName(), fileMeta.getSize(), downloadUrl,
-                link.getMaxDownloads() != null ? link.getMaxDownloads() - link.getDownloadCount() : null);
+        Integer remainingDownloads = link.getMaxDownloads() != null ? link.getMaxDownloads() - link.getDownloadCount() : null;
+
+        ShareAccessResponse resp = new ShareAccessResponse();
+        resp.setFileId(fileMeta.getId());
+        resp.setFileName(fileMeta.getName());
+        resp.setFileSize(fileMeta.getSize() != null ? fileMeta.getSize() : 0L);
+        resp.setDir(Boolean.TRUE.equals(fileMeta.getIsDir()));
+        resp.setRemainingDownloads(remainingDownloads);
+
+        if (resp.isDir()) {
+            List<ShareFileNode> tree = buildDirTree(link, fileMeta.getId());
+            resp.setChildren(tree);
+            log.info("目录分享访问成功: code={}, dirId={}", code, link.getFileId());
+        } else {
+            String downloadUrl = minioService.presignedGetUrl(fileMeta.getContentRef(), DOWNLOAD_TTL_SECONDS);
+            resp.setDownloadUrl(downloadUrl);
+            log.info("分享访问成功: code={}, fileId={}", code, link.getFileId());
+        }
+
+        return resp;
+    }
+
+    @Override
+    public byte[] downloadFiles(String code, List<Long> fileIds) {
+        ShareLink link = validateShareForAccess(code);
+
+        Long originalTenantId = TenantContext.getTenantId();
+        try {
+            TenantContext.setTenantId(link.getTenantId());
+
+            List<FileMeta> filesToDownload = new ArrayList<>();
+            Set<Long> addedIds = new HashSet<>();
+
+            for (Long fileId : fileIds) {
+                FileMeta meta = fileMetaMapper.selectById(fileId);
+                if (meta == null) continue;
+
+                if (Boolean.TRUE.equals(meta.getIsDir())) {
+                    String prefix = meta.getPath();
+                    List<FileMeta> descendants = fileMetaMapper.listByPathPrefix(prefix);
+                    for (FileMeta d : descendants) {
+                        if (!Boolean.TRUE.equals(d.getIsDir()) && addedIds.add(d.getId())) {
+                            filesToDownload.add(d);
+                        }
+                    }
+                } else {
+                    if (addedIds.add(meta.getId())) {
+                        filesToDownload.add(meta);
+                    }
+                }
+            }
+
+            if (filesToDownload.isEmpty()) {
+                throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
+            }
+
+            FileMeta rootMeta = fileMetaMapper.selectById(link.getFileId());
+            String rootPath = rootMeta.getPath();
+
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ZipOutputStream zos = new ZipOutputStream(baos);
+
+                for (FileMeta file : filesToDownload) {
+                    String entryName;
+                    if (filesToDownload.size() == 1) {
+                        entryName = file.getName();
+                    } else {
+                        String relativePath = file.getPath().substring(rootPath.length());
+                        entryName = relativePath.endsWith("/") ? relativePath.substring(0, relativePath.length() - 1) : relativePath;
+                    }
+
+                    ZipEntry entry = new ZipEntry(entryName);
+                    zos.putNextEntry(entry);
+
+                    InputStream is = minioService.getObjectStream(file.getContentRef());
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = is.read(buffer)) > 0) {
+                        zos.write(buffer, 0, len);
+                    }
+                    is.close();
+                    zos.closeEntry();
+                }
+
+                zos.finish();
+                zos.close();
+                link.setDownloadCount(link.getDownloadCount() + 1);
+                shareLinkMapper.updateById(link);
+                log.info("分享批量下载: code={}, fileCount={}", code, filesToDownload.size());
+                return baos.toByteArray();
+            } catch (IOException e) {
+                throw new RuntimeException("生成zip文件失败", e);
+            }
+        } finally {
+            TenantContext.setTenantId(originalTenantId);
+        }
     }
 
     // ==================== 管理 ====================
@@ -221,6 +312,28 @@ public class ShareServiceImpl implements ShareService {
 
     // ==================== 私有方法 ====================
 
+    private ShareLink validateShareForAccess(String code) {
+        String lockKey = String.format(SHARE_LOCK_KEY, code);
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(lockKey))) {
+            throw new BusinessException(ErrorCode.SHARE_LOCKED);
+        }
+
+        ShareLink link = shareLinkMapper.findByCode(code);
+        if (link == null || !"active".equals(link.getStatus())) {
+            throw new BusinessException(ErrorCode.SHARE_NOT_FOUND);
+        }
+
+        if (link.getExpireAt() != null && link.getExpireAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.SHARE_EXPIRED);
+        }
+
+        if (link.getMaxDownloads() != null && link.getDownloadCount() >= link.getMaxDownloads()) {
+            throw new BusinessException(ErrorCode.SHARE_EXHAUSTED);
+        }
+
+        return link;
+    }
+
     private String generateRandomCode() {
         StringBuilder sb = new StringBuilder(CODE_LENGTH);
         for (int i = 0; i < CODE_LENGTH; i++) {
@@ -258,6 +371,31 @@ public class ShareServiceImpl implements ShareService {
         try {
             TenantContext.setTenantId(link.getTenantId());
             return fileMetaMapper.selectById(link.getFileId());
+        } finally {
+            TenantContext.setTenantId(originalTenantId);
+        }
+    }
+
+    private List<ShareFileNode> buildDirTree(ShareLink link, Long parentId) {
+        Long originalTenantId = TenantContext.getTenantId();
+        try {
+            TenantContext.setTenantId(link.getTenantId());
+            List<FileMeta> children = fileMetaMapper.listByParent(parentId);
+            List<ShareFileNode> tree = new ArrayList<>();
+            for (FileMeta child : children) {
+                ShareFileNode node = new ShareFileNode();
+                node.setId(child.getId());
+                node.setName(child.getName());
+                node.setDir(Boolean.TRUE.equals(child.getIsDir()));
+                node.setSize(child.getSize() != null ? child.getSize() : 0L);
+                if (node.isDir()) {
+                    node.setChildren(buildDirTree(link, child.getId()));
+                }
+                tree.add(node);
+            }
+            tree.sort(Comparator.comparing(ShareFileNode::isDir).reversed()
+                    .thenComparing(ShareFileNode::getName));
+            return tree;
         } finally {
             TenantContext.setTenantId(originalTenantId);
         }
