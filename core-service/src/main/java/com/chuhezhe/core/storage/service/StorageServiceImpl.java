@@ -68,7 +68,7 @@ public class StorageServiceImpl implements StorageService {
         meta.setOwnerId(userId);
         meta.setParentId(parentId);
         meta.setName(request.getFileName());
-        meta.setPath("/" + request.getFileName());
+        meta.setPath(buildFilePath(parentId, request.getFileName()));
         meta.setIsDir(false);
         meta.setSize(request.getFileSize());
         meta.setHash(request.getHash());
@@ -227,7 +227,7 @@ public class StorageServiceImpl implements StorageService {
         metaEntity.setOwnerId(userId);
         metaEntity.setParentId(parentId);
         metaEntity.setName(fileName);
-        metaEntity.setPath("/" + fileName);
+        metaEntity.setPath(buildFilePath(parentId, fileName));
         metaEntity.setIsDir(false);
         metaEntity.setSize(totalSize);
         metaEntity.setHash(hash);
@@ -250,6 +250,22 @@ public class StorageServiceImpl implements StorageService {
     // ==================== 私有方法 ====================
 
     /** 将事件写入 outbox_event 表，后续由定时任务或 MQ 消费者处理 */
+    /** 根据父目录构建文件的完整物化路径（文件 path 不以 / 结尾，目录才以 / 结尾） */
+    private String buildFilePath(long parentId, String name) {
+        if (parentId <= 0) {
+            return "/" + name;
+        }
+        FileMeta parent = fileMetaMapper.selectById(parentId);
+        if (parent == null) {
+            return "/" + name;
+        }
+        String parentPath = parent.getPath();
+        if (!parentPath.endsWith("/")) {
+            parentPath = parentPath + "/";
+        }
+        return parentPath + name;
+    }
+
     private void publishEvent(Long fileId, String eventType, FileMeta meta) {
         try {
             OutboxEvent event = new OutboxEvent();

@@ -122,11 +122,39 @@ export default function ShareAccessPage() {
     return convert(accessData.children);
   }, [accessData]);
 
+  const getTopLevelCheckedKeys = (keys: React.Key[]): React.Key[] => {
+    const keySet = new Set(keys.map(String));
+    const parentMap = new Map<string, string>();
+
+    const buildParentMap = (nodes: TreeNode[], parentKey?: string) => {
+      for (const node of nodes) {
+        if (parentKey) {
+          parentMap.set(node.key, parentKey);
+        }
+        if (node.children) {
+          buildParentMap(node.children, node.key);
+        }
+      }
+    };
+    buildParentMap(treeData);
+
+    return keys.filter((key) => {
+      const k = String(key);
+      let current = parentMap.get(k);
+      while (current) {
+        if (keySet.has(current)) return false;
+        current = parentMap.get(current);
+      }
+      return true;
+    });
+  };
+
   const handleDownload = async () => {
     if (!code || checkedKeys.length === 0) return;
     setDownloading(true);
     try {
-      const fileIds = checkedKeys.map((k) => String(k));
+      const topLevelKeys = getTopLevelCheckedKeys(checkedKeys);
+      const fileIds = topLevelKeys.map((k) => String(k));
       const response = await apiClient.post(`/shares/${code}/download`, { fileIds }, {
         responseType: 'blob',
       });
