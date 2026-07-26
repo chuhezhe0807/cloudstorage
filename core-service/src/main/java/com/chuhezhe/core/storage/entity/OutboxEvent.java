@@ -1,7 +1,7 @@
 package com.chuhezhe.core.storage.entity;
 
 import com.chuhezhe.common.entity.BaseEntity;
-import com.chuhezhe.core.storage.handler.JsonbTypeHandler;
+import com.chuhezhe.common.handler.JsonbTypeHandler;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;

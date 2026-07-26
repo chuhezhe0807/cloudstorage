@@ -2,14 +2,20 @@ package com.chuhezhe.core.share.service;
 
 import com.chuhezhe.common.context.TenantContext;
 import com.chuhezhe.common.exception.BusinessException;
+import com.chuhezhe.common.mq.EventType;
 import com.chuhezhe.common.result.ErrorCode;
 import com.chuhezhe.core.file.entity.FileMeta;
 import com.chuhezhe.core.file.mapper.FileMetaMapper;
 import com.chuhezhe.core.share.dto.*;
 import com.chuhezhe.core.share.entity.ShareLink;
 import com.chuhezhe.core.share.mapper.ShareLinkMapper;
+import com.chuhezhe.core.storage.entity.OutboxEvent;
+import com.chuhezhe.core.storage.mapper.OutboxEventMapper;
 import com.chuhezhe.core.storage.service.MinioService;
 import com.chuhezhe.core.storage.service.FileZipService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -37,6 +43,8 @@ public class ShareServiceImpl implements ShareService {
 
     private final ShareLinkMapper shareLinkMapper;
     private final FileMetaMapper fileMetaMapper;
+    private final OutboxEventMapper outboxEventMapper;
+    private final ObjectMapper objectMapper;
     private final MinioService minioService;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
@@ -172,6 +180,7 @@ public class ShareServiceImpl implements ShareService {
             log.info("分享访问成功: code={}, fileId={}", code, link.getFileId());
         }
 
+        publishShareEvent(link.getId(), EventType.SHARE_ACCESSED, link, fileMeta);
         return resp;
     }
 
@@ -351,5 +360,27 @@ public class ShareServiceImpl implements ShareService {
         vo.setStatus(link.getStatus());
         vo.setCreatedAt(link.getCreatedAt());
         return vo;
+    }
+
+    private void publishShareEvent(Long shareId, EventType eventType, ShareLink link, FileMeta fileMeta) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("shareId", shareId);
+        payload.put("code", link.getCode());
+        payload.put("fileId", link.getFileId());
+        payload.put("tenantId", link.getTenantId());
+        payload.put("ownerId", link.getOwnerId());
+        payload.put("fileName", fileMeta != null ? fileMeta.getName() : null);
+
+        OutboxEvent event = new OutboxEvent();
+        event.setAggregateId(String.valueOf(shareId));
+        event.setEventType(eventType.getTypeName());
+        try {
+            event.setPayload(objectMapper.writeValueAsString(payload));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("序列化 outbox 事件失败", e);
+        }
+        event.setStatus("pending");
+        event.setRetries(0);
+        outboxEventMapper.insert(event);
     }
 }

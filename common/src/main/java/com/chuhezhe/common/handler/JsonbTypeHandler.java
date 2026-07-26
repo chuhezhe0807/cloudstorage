@@ -1,4 +1,4 @@
-package com.chuhezhe.core.storage.handler;
+package com.chuhezhe.common.handler;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

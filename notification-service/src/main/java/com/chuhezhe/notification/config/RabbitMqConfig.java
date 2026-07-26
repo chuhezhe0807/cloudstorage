@@ -1,5 +1,6 @@
 package com.chuhezhe.notification.config;
 
+import com.chuhezhe.common.mq.RabbitMqConstants;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,53 +11,43 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfig {
 
-    public static final String EXCHANGE = "cloudstorage.events";
-    public static final String QUEUE = "cloudstorage.notifications";
-    public static final String DLQ = "cloudstorage.notifications.dlq";
-    public static final String ROUTING_KEY = "notification.#";
-
-    @Bean
-    public TopicExchange eventExchange() {
-        return new TopicExchange(EXCHANGE);
-    }
-
     @Bean
     public Queue notificationQueue() {
-        return QueueBuilder.durable(QUEUE)
-                .deadLetterExchange(EXCHANGE)
-                .deadLetterRoutingKey("notification.dlq")
+        return QueueBuilder.durable(RabbitMqConstants.NOTIFICATION_QUEUE)
+                .deadLetterExchange(RabbitMqConstants.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMqConstants.NOTIFICATION_DLQ_ROUTING_KEY)
                 .build();
     }
 
     @Bean
     public Queue deadLetterQueue() {
-        return QueueBuilder.durable(DLQ).build();
+        return QueueBuilder.durable(RabbitMqConstants.NOTIFICATION_DLQ).build();
     }
 
     @Bean
-    public Binding notificationBinding() {
-        return BindingBuilder.bind(notificationQueue())
-                .to(eventExchange())
-                .with(ROUTING_KEY);
+    public Binding notificationBinding(Queue notificationQueue, TopicExchange eventExchange) {
+        return BindingBuilder.bind(notificationQueue)
+                .to(eventExchange)
+                .with(RabbitMqConstants.NOTIFICATION_ROUTING_KEY);
     }
 
     @Bean
-    public Binding dlqBinding() {
-        return BindingBuilder.bind(deadLetterQueue())
-                .to(eventExchange())
-                .with("notification.dlq");
+    public Binding dlqBinding(Queue deadLetterQueue, TopicExchange eventExchange) {
+        return BindingBuilder.bind(deadLetterQueue)
+                .to(eventExchange)
+                .with(RabbitMqConstants.NOTIFICATION_DLQ_ROUTING_KEY);
     }
 
     /** 二期 RAG 索引请求队列（预留，当前不接消费者） */
     @Bean
     public Queue kbIndexQueue() {
-        return QueueBuilder.durable("cloudstorage.kb.index").build();
+        return QueueBuilder.durable(RabbitMqConstants.KB_INDEX_QUEUE).build();
     }
 
     @Bean
-    public Binding kbIndexBinding() {
-        return BindingBuilder.bind(kbIndexQueue())
-                .to(eventExchange())
-                .with("kb.index.request");
+    public Binding kbIndexBinding(Queue kbIndexQueue, TopicExchange eventExchange) {
+        return BindingBuilder.bind(kbIndexQueue)
+                .to(eventExchange)
+                .with(RabbitMqConstants.KB_INDEX_ROUTING_KEY);
     }
 }

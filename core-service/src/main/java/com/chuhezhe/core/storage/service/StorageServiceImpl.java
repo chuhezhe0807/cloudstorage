@@ -2,6 +2,7 @@ package com.chuhezhe.core.storage.service;
 
 import com.chuhezhe.common.context.TenantContext;
 import com.chuhezhe.common.exception.BusinessException;
+import com.chuhezhe.common.mq.EventType;
 import com.chuhezhe.common.result.ErrorCode;
 import com.chuhezhe.core.file.entity.FileContent;
 import com.chuhezhe.core.file.entity.FileMeta;
@@ -11,6 +12,7 @@ import com.chuhezhe.core.storage.dto.*;
 import com.chuhezhe.core.storage.entity.OutboxEvent;
 import com.chuhezhe.core.storage.mapper.OutboxEventMapper;
 import com.chuhezhe.core.storage.util.FileSecurityUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +83,7 @@ public class StorageServiceImpl implements StorageService {
         fileContentMapper.updateById(existing);
 
         log.info("秒传成功: hash={}, fileId={}", request.getHash(), meta.getId());
-        publishEvent(meta.getId(), "upload.completed", meta);
+        publishEvent(meta.getId(), EventType.UPLOAD_COMPLETED, meta);
         return new FileUploadResponse(meta.getId(), request.getFileName(), request.getFileSize(), true);
     }
 
@@ -244,7 +246,7 @@ public class StorageServiceImpl implements StorageService {
         minioService.deleteChunks(chunkKeys);
 
         log.info("上传完成: uploadId={}, fileId={}, size={}", uploadId, metaEntity.getId(), totalSize);
-        publishEvent(metaEntity.getId(), "upload.completed", metaEntity);
+        publishEvent(metaEntity.getId(), EventType.UPLOAD_COMPLETED, metaEntity);
         return new FileUploadResponse(metaEntity.getId(), fileName, totalSize, false);
     }
 
@@ -274,17 +276,17 @@ public class StorageServiceImpl implements StorageService {
         return parentPath + name;
     }
 
-    private void publishEvent(Long fileId, String eventType, FileMeta meta) {
+    private void publishEvent(Long fileId, EventType eventType, FileMeta meta) {
+        OutboxEvent event = new OutboxEvent();
+        event.setAggregateId(String.valueOf(fileId));
+        event.setEventType(eventType.getTypeName());
         try {
-            OutboxEvent event = new OutboxEvent();
-            event.setAggregateId(String.valueOf(fileId));
-            event.setEventType(eventType);
             event.setPayload(objectMapper.writeValueAsString(meta));
-            event.setStatus("pending");
-            event.setRetries(0);
-            outboxEventMapper.insert(event);
-        } catch (Exception e) {
-            log.error("写 outbox 事件失败: fileId={}, eventType={}", fileId, eventType, e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("序列化 outbox 事件失败", e);
         }
+        event.setStatus("pending");
+        event.setRetries(0);
+        outboxEventMapper.insert(event);
     }
 }
