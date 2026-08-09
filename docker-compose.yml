@@ -79,3 +79,23 @@ services:
       - "8090:8080"
     depends_on:
       - skywalking-oap
+
+  langfuse:
+    image: ghcr.io/langfuse/langfuse:latest
+    container_name: langfuse
+    environment:
+      DATABASE_URL: postgresql://cloudstorage:cloudstorage123@postgres:5432/langfuse
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: mysecretlangfuse
+      SALT: mysaltlangfuse
+      LANGFUSE_INIT_ORG_ID: cloudstorage
+      LANGFUSE_INIT_ORG_NAME: cloudstorage
+      LANGFUSE_INIT_PROJECT_ID: cloudstorage
+      LANGFUSE_INIT_PROJECT_NAME: cloudstorage
+      LANGFUSE_INIT_USER_EMAIL: admin@cloudstorage.cn
+      LANGFUSE_INIT_USER_NAME: admin
+      LANGFUSE_INIT_USER_PASSWORD: cloudstorage123
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres

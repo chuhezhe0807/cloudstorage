@@ -24,7 +24,7 @@ spring:
         - id: core-service
           uri: lb://core-service
           predicates:
-            - Path=/api/files/**, /api/storage/**, /api/shares/**
+            - Path=/api/files/**, /api/storage/**, /api/shares/**, /api/kb/**, /api/rag/**
         - id: notification-service
           uri: lb://notification-service
           predicates:

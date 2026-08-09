@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE DATABASE langfuse;
 
 -- ==============================
 -- Tenant
@@ -144,12 +145,18 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     id BIGINT PRIMARY KEY,
     tenant_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    file_id BIGINT NOT NULL,
     name VARCHAR(256) NOT NULL,
     description TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'processing',
+    total_files INT NOT NULL DEFAULT 0,
+    processed_files INT NOT NULL DEFAULT 0,
+    failed_files JSONB,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_kb_tenant ON knowledge_base(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_kb_file ON knowledge_base(tenant_id, file_id);
 
 CREATE TABLE IF NOT EXISTS kb_chunk (
     id BIGINT PRIMARY KEY,
@@ -163,3 +170,4 @@ CREATE TABLE IF NOT EXISTS kb_chunk (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_kbc_tenant_kb ON kb_chunk(tenant_id, kb_id);
+CREATE INDEX IF NOT EXISTS idx_kbc_embedding ON kb_chunk USING hnsw (embedding vector_cosine_ops);
