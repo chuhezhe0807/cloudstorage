@@ -210,12 +210,21 @@ public class ShareServiceImpl implements ShareService {
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ShareLink>()
                         .eq(ShareLink::getOwnerId, userId)
                         .orderByDesc(ShareLink::getCreatedAt));
+        if (links.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> fileIds = links.stream()
+                .map(ShareLink::getFileId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, FileMeta> fileMap = fileIds.isEmpty() ? Map.of()
+                : fileMetaMapper.selectBatchIds(fileIds).stream()
+                        .collect(Collectors.toMap(FileMeta::getId, f -> f, (a, b) -> a));
 
         return links.stream()
-                .map(link -> {
-                    FileMeta file = fileMetaMapper.selectById(link.getFileId());
-                    return toVO(link, file, link.getPasswordHash() != null);
-                })
+                .map(link -> toVO(link, fileMap.get(link.getFileId()), link.getPasswordHash() != null))
                 .collect(Collectors.toList());
     }
 
@@ -352,6 +361,7 @@ public class ShareServiceImpl implements ShareService {
         vo.setId(link.getId());
         vo.setFileId(link.getFileId());
         vo.setFileName(file != null ? file.getName() : null);
+        vo.setIsDir(file != null ? file.getIsDir() : null);
         vo.setCode(link.getCode());
         vo.setHasPassword(hasPassword);
         vo.setExpireAt(link.getExpireAt());

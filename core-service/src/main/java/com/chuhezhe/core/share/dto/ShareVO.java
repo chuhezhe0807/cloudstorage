@@ -13,6 +13,7 @@ public class ShareVO {
     private Long id;
     private Long fileId;
     private String fileName;
+    private Boolean isDir;
     private String code;
     private boolean hasPassword;
     private LocalDateTime expireAt;

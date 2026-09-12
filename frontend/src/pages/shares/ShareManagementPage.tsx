@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Table, Button, Space, Modal, Input, App, DatePicker } from 'antd';
+import { useState, useEffect, Suspense, lazy } from 'react';
+import { Table, Button, Space, Modal, Input, App, DatePicker, Spin } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/client';
+import type { FilePreviewItem } from '../../components/file/FilePreviewModal';
+
+const FilePreviewModal = lazy(() => import('../../components/file/FilePreviewModal'));
 
 interface ShareItem {
   id: string;
+  fileId: number;
   code: string;
   fileName: string;
+  isDir: boolean;
   hasPassword: boolean;
   downloadCount: number;
   maxDownloads: number | null;
@@ -29,6 +35,8 @@ export default function ShareManagementPage() {
   const [editPassword, setEditPassword] = useState('');
   const [editExpireAt, setEditExpireAt] = useState<string | null>(null);
   const [editMaxDownloads, setEditMaxDownloads] = useState<number | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<FilePreviewItem | null>(null);
 
   const fetchShares = async () => {
     setLoading(true);
@@ -87,6 +95,20 @@ export default function ShareManagementPage() {
     }
   };
 
+  const handleDownload = async (id: string) => {
+    try {
+      const { data } = await apiClient.get(`/storage/download/${id}`);
+      window.open(data.data?.downloadUrl || `/api/storage/download/${id}`, '_blank');
+    } catch {
+      message.error('Download failed');
+    }
+  };
+
+  const openPreview = (r: ShareItem) => {
+    setPreviewFile({ id: String(r.fileId), name: r.fileName, isDir: r.isDir, size: 0, updatedAt: '' });
+    setPreviewOpen(true);
+  };
+
   const columns = [
     { title: 'File', dataIndex: 'fileName' },
     { title: t('share.code'), dataIndex: 'code' },
@@ -96,6 +118,7 @@ export default function ShareManagementPage() {
     { title: 'Status', dataIndex: 'status' },
     { title: 'Actions', key: 'actions', render: (_: unknown, r: ShareItem) => (
         <Space>
+          {!r.isDir && <Button size="small" icon={<EyeOutlined />} onClick={() => openPreview(r)}>{t('common.preview')}</Button>}
           <Button size="small" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/share/${r.code}`); message.success('Link copied'); }}>{t('common.copy')}</Button>
           {r.status === 'active' && <Button size="small" onClick={() => openEditModal(r)}>{t('common.edit')}</Button>}
           {r.status === 'active' && <Button size="small" danger onClick={() => handleCancel(r.id)}>{t('common.delete')}</Button>}
@@ -133,6 +156,11 @@ export default function ShareManagementPage() {
           onChange={(e) => setEditMaxDownloads(e.target.value ? Number(e.target.value) : null)}
         />
       </Modal>
+      {previewOpen && (
+        <Suspense fallback={<div className="flex justify-center" style={{ minHeight: 200 }}><Spin /></div>}>
+          <FilePreviewModal open={previewOpen} file={previewFile} onClose={() => setPreviewOpen(false)} onDownload={handleDownload} />
+        </Suspense>
+      )}
     </div>
   );
 }
