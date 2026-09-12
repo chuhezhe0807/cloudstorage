@@ -60,6 +60,26 @@ services:
       - ./data/minio:/data
     command: server /data --console-address ":9001"
 
+  skywalking-oap:
+    image: apache/skywalking-oap-server:9.4.0
+    container_name: skywalking-oap
+    environment:
+      SW_STORAGE: h2
+      SW_HEALTH_CHECKER: default
+    ports:
+      - "11800:11800"
+      - "12800:12800"
+
+  skywalking-ui:
+    image: apache/skywalking-ui:9.4.0
+    container_name: skywalking-ui
+    environment:
+      SW_OAP_ADDRESS: http://skywalking-oap:12800
+    ports:
+      - "8090:8080"
+    depends_on:
+      - skywalking-oap
+
   langfuse:
     image: ghcr.io/langfuse/langfuse:latest
     container_name: langfuse
