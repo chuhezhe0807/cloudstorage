@@ -35,6 +35,7 @@
   "common.newFolder": "新建文件夹",
   "common.ok": "确定",
   "common.copy": "复制",
+  "common.preview": "预览",
   "file.name": "名称",
   "file.size": "大小",
   "file.modified": "修改时间",
@@ -72,5 +73,11 @@
   "notif.delete": "删除",
   "error.quota_exceeded": "存储空间已满",
   "error.file_not_found": "文件不存在",
-  "error.account_exists": "账号已存在"
+  "error.account_exists": "账号已存在",
+  "preview.title": "文件预览",
+  "preview.loadFailed": "加载预览失败",
+  "preview.renderFailed": "渲染文件失败",
+  "preview.noContent": "暂无预览内容",
+  "preview.unsupported": "该文件类型暂不支持在线预览，请下载后查看",
+  "preview.officeViewerHint": "Office 文件通过微软在线服务预览，需文件可公网访问。如无法预览请下载后查看"
 }

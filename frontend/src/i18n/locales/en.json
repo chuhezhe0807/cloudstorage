@@ -35,6 +35,7 @@
   "common.newFolder": "New Folder",
   "common.ok": "OK",
   "common.copy": "Copy",
+  "common.preview": "Preview",
   "file.name": "Name",
   "file.size": "Size",
   "file.modified": "Modified",
@@ -72,5 +73,11 @@
   "notif.delete": "Delete",
   "error.quota_exceeded": "Storage quota exceeded",
   "error.file_not_found": "File not found",
-  "error.account_exists": "Account already exists"
+  "error.account_exists": "Account already exists",
+  "preview.title": "File Preview",
+  "preview.loadFailed": "Failed to load preview",
+  "preview.renderFailed": "Failed to render file",
+  "preview.noContent": "No preview content available",
+  "preview.unsupported": "This file type does not support online preview. Please download to view.",
+  "preview.officeViewerHint": "Office files are previewed via Microsoft Online. The file URL must be publicly accessible. If preview fails, please download."
 }

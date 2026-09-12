@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Breadcrumb, Space, Modal, Input, App, DatePicker } from 'antd';
-import { HomeOutlined, UploadOutlined, FolderAddOutlined, ShareAltOutlined } from '@ant-design/icons';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import { Table, Button, Breadcrumb, Space, Modal, Input, App, DatePicker, Spin } from 'antd';
+import { HomeOutlined, UploadOutlined, FolderAddOutlined, ShareAltOutlined, EyeOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../../api/client';
 import FileUploadModal from '../../components/upload/FileUploadModal';
+
+const FilePreviewModal = lazy(() => import('../../components/file/FilePreviewModal'));
 
 interface FileItem {
   id: string;
@@ -31,6 +33,8 @@ export default function FileListPage() {
   const [sharePassword, setSharePassword] = useState('');
   const [shareExpireAt, setShareExpireAt] = useState<string | null>(null);
   const [shareMaxDownloads, setShareMaxDownloads] = useState<number | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -148,6 +152,7 @@ export default function FileListPage() {
     { title: t('file.modified'), dataIndex: 'updatedAt', key: 'updatedAt' },
     { title: 'Actions', key: 'actions', render: (_: unknown, r: FileItem) => (
         <Space>
+          {!r.isDir && <Button size="small" icon={<EyeOutlined />} onClick={() => { setPreviewFile(r); setPreviewOpen(true); }}>{t('common.preview')}</Button>}
           <Button size="small" onClick={() => { setRenameId(r.id); setRenameName(r.name); setRenameOpen(true); }}>{t('common.rename')}</Button>
           <Button size="small" icon={<ShareAltOutlined />} onClick={() => openShareModal(r.id)}>{t('common.share')}</Button>
           <Button size="small" danger onClick={() => handleDelete(r.id)}>{t('common.delete')}</Button>
@@ -192,6 +197,11 @@ export default function FileListPage() {
         />
       </Modal>
       <FileUploadModal open={uploadOpen} parentId={parentId} onClose={() => setUploadOpen(false)} onSuccess={fetchFiles} />
+      {previewOpen && (
+        <Suspense fallback={<div className="flex justify-center" style={{ minHeight: 200 }}><Spin /></div>}>
+          <FilePreviewModal open={previewOpen} file={previewFile} onClose={() => setPreviewOpen(false)} onDownload={handleDownload} />
+        </Suspense>
+      )}
     </div>
   );
 }
