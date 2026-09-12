@@ -9,8 +9,6 @@ import SearchPage from '../pages/files/SearchPage';
 import ShareManagementPage from '../pages/shares/ShareManagementPage';
 import ShareAccessPage from '../pages/shares/ShareAccessPage';
 import NotificationListPage from '../pages/notifications/NotificationListPage';
-import KbProgressPage from '../pages/kb/KbProgressPage';
-import RagChatPage from '../pages/rag/RagChatPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const router = createBrowserRouter([
@@ -27,8 +25,6 @@ const router = createBrowserRouter([
       { path: 'search', element: <SearchPage /> },
       { path: 'shares', element: <ShareManagementPage /> },
       { path: 'notifications', element: <NotificationListPage /> },
-      { path: 'kb/progress', element: <KbProgressPage /> },
-      { path: 'rag/chat', element: <RagChatPage /> },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

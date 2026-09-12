@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Breadcrumb, Space, Modal, Input, App, DatePicker, Tooltip } from 'antd';
-import { HomeOutlined, UploadOutlined, FolderAddOutlined, ShareAltOutlined, CloudServerOutlined, MessageOutlined } from '@ant-design/icons';
+import { Table, Button, Breadcrumb, Space, Modal, Input, App, DatePicker } from 'antd';
+import { HomeOutlined, UploadOutlined, FolderAddOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/client';
 import FileUploadModal from '../../components/upload/FileUploadModal';
-import { formatSize, getFolderSizeHintClass } from '../../utils/fileSize';
 
 interface FileItem {
   id: string;
@@ -18,7 +16,6 @@ interface FileItem {
 export default function FileListPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const navigate = useNavigate();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [parentId, setParentId] = useState<string>('0');
   const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([{ id: '0', name: 'Root' }]);
@@ -34,42 +31,6 @@ export default function FileListPage() {
   const [sharePassword, setSharePassword] = useState('');
   const [shareExpireAt, setShareExpireAt] = useState<string | null>(null);
   const [shareMaxDownloads, setShareMaxDownloads] = useState<number | null>(null);
-  const [kbStatus, setKbStatus] = useState<string | null>(null);
-  const [kbId, setKbIdState] = useState<string | null>(null);
-
-  useEffect(() => {
-    apiClient.get('/kb/progress').then(({ data }) => {
-      const list: Array<{ fileId: string; kbId: string; status: string }> = data.data || [];
-      const match = list.find((kb) => kb.fileId === parentId);
-      if (match) {
-        setKbStatus(match.status);
-        setKbIdState(match.kbId);
-      } else {
-        setKbStatus(null);
-        setKbIdState(null);
-      }
-    }).catch(() => {});
-  }, [parentId]);
-
-  const handleVectorize = () => {
-    const totalSize = files.filter((f) => !f.isDir).reduce((sum, f) => sum + f.size, 0);
-    const hintClass = getFolderSizeHintClass(totalSize);
-    const onConfirm = async () => {
-      try {
-        await apiClient.post('/kb/index', { fileId: parentId });
-        message.success(t('kb.triggerSuccess'));
-      } catch {
-        message.error('Trigger failed');
-      }
-    };
-    if (hintClass === 'large') {
-      Modal.confirm({ title: t('kb.sizeHintLarge'), onOk: onConfirm });
-    } else if (hintClass === 'small') {
-      Modal.confirm({ title: t('kb.sizeHintSmall'), onOk: onConfirm });
-    } else {
-      onConfirm();
-    }
-  };
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -202,20 +163,6 @@ export default function FileListPage() {
       <div className="my-3 flex gap-2">
         <Button icon={<UploadOutlined />} onClick={() => setUploadOpen(true)}>{t('common.upload')}</Button>
         <Button icon={<FolderAddOutlined />} onClick={() => setMkdirOpen(true)}>{t('common.newFolder')}</Button>
-        {parentId !== '0' && (
-          <>
-            <Button icon={<CloudServerOutlined />} onClick={handleVectorize}>{t('kb.vectorize')}</Button>
-            <Tooltip title={(!kbStatus || kbStatus === 'processing') ? t('kb.notReady') : undefined}>
-              <Button
-                icon={<MessageOutlined />}
-                disabled={!kbStatus || kbStatus === 'processing'}
-                onClick={() => navigate(`/rag/chat?kbId=${kbId}`)}
-              >
-                {t('kb.enterRag')}
-              </Button>
-            </Tooltip>
-          </>
-        )}
       </div>
       <Table columns={columns} dataSource={files} rowKey="id" loading={loading} pagination={false} />
 
@@ -247,4 +194,11 @@ export default function FileListPage() {
       <FileUploadModal open={uploadOpen} parentId={parentId} onClose={() => setUploadOpen(false)} onSuccess={fetchFiles} />
     </div>
   );
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+  return (bytes / 1073741824).toFixed(1) + ' GB';
 }

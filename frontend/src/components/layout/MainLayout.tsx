@@ -19,8 +19,6 @@ import {
   LogoutOutlined,
   SunOutlined,
   MoonOutlined,
-  CloudServerOutlined,
-  MessageOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
@@ -44,8 +42,6 @@ export default function MainLayout() {
     { key: '/recycle', icon: <DeleteOutlined />, label: t('nav.recycle') },
     { key: '/shares', icon: <ShareAltOutlined />, label: t('nav.shares') },
     { key: '/notifications', icon: <BellOutlined />, label: t('nav.notifications') },
-    { key: '/kb/progress', icon: <CloudServerOutlined />, label: t('nav.kbProgress') },
-    { key: '/rag/chat', icon: <MessageOutlined />, label: t('nav.ragChat') },
   ];
 
   const switchLang = () => {

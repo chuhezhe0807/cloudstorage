@@ -39,13 +39,7 @@ public enum ErrorCode {
     SHARE_LOCKED(4003, "error.share_locked"),
     INVALID_SHARE_CODE(4004, "error.invalid_share_code"),
     INVALID_SHARE_PASSWORD(4005, "error.invalid_share_password"),
-    SHARE_NOT_FOUND(4006, "error.share_not_found"),
-
-    KB_NOT_READY(5001, "error.kb_not_ready"),
-    KB_NOT_FOUND(5002, "error.kb_not_found"),
-    UNSUPPORTED_FILE_TYPE(5003, "error.unsupported_file_type"),
-    VECTORIZE_FAILED(5004, "error.vectorize_failed"),
-    LLM_CALL_FAILED(5005, "error.llm_call_failed");
+    SHARE_NOT_FOUND(4006, "error.share_not_found");
 
     private final int code;
     private final String i18nKey;

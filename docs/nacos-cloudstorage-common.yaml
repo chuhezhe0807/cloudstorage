@@ -48,16 +48,3 @@ spring.cloud.sentinel.transport.dashboard: localhost:9080
 logging:
   level:
     com.chuhezhe: DEBUG
-
-llm:
-  provider: openai
-  base-url: https://api.openai.com/v1
-  api-key: ${LLM_API_KEY:changeme}
-  chat-model: gpt-4o-mini
-  embedding-model: text-embedding-ada-002
-  embedding-dimension: 1536
-
-langfuse:
-  base-url: http://localhost:3000
-  public-key: ${LANGFUSE_PUBLIC_KEY:pk-changeme}
-  secret-key: ${LANGFUSE_SECRET_KEY:sk-changeme}
