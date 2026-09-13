@@ -13,6 +13,19 @@
     <artifactId>common</artifactId>
     <packaging>jar</packaging>
 
+    <build>
+        <plugins>
+            <!-- common 是被依赖的库模块，没有主类，跳过 Spring Boot 可执行 jar 重打包 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

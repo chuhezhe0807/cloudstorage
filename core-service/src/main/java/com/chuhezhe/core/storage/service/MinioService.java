@@ -4,7 +4,6 @@ import com.chuhezhe.common.context.TenantContext;
 import com.chuhezhe.core.storage.config.MinioConfig;
 import io.minio.*;
 import io.minio.http.Method;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +19,28 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MinioService {
 
     private final MinioClient minioClient;
     private final MinioConfig minioConfig;
+    /** 使用对外地址构建的客户端，仅用于生成浏览器可达的预签名 URL */
+    private final MinioClient presignClient;
+
+    public MinioService(MinioClient minioClient, MinioConfig minioConfig) {
+        this.minioClient = minioClient;
+        this.minioConfig = minioConfig;
+        String publicEndpoint = minioConfig.getPublicEndpoint();
+        if (publicEndpoint != null && !publicEndpoint.isBlank()
+                && !publicEndpoint.equals(minioConfig.getEndpoint())) {
+            this.presignClient = MinioClient.builder()
+                    .endpoint(publicEndpoint)
+                    .credentials(minioConfig.getAccessKey(), minioConfig.getSecretKey())
+                    .region(minioConfig.getRegion())
+                    .build();
+        } else {
+            this.presignClient = minioClient;
+        }
+    }
 
     /** 创建 Bucket（幂等） */
     public void ensureBucket() {
@@ -47,7 +63,7 @@ public class MinioService {
     /** 为分片生成预签名 PUT URL */
     public String presignedPutUrl(String objectKey, int ttlSeconds) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            return presignClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.PUT)
                             .bucket(minioConfig.getBucket())
@@ -62,7 +78,7 @@ public class MinioService {
     /** 为对象生成预签名 GET URL（下载） */
     public String presignedGetUrl(String objectKey, int ttlSeconds) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            return presignClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(minioConfig.getBucket())
